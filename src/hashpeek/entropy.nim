@@ -18,5 +18,5 @@ proc calculateEntropy*(input: string): float =
   #negate the sum as entropy is positive
   return -entropy
 
-proc minimumEntropy*(input: string, minEnt: float): bool
+proc minimumEntropy*(input: string, minEnt: float): bool =
   return calculateEntropy(input) >= minEnt

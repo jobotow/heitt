@@ -1,73 +1,140 @@
 require 'set'
 #require_relative '../cli_flag'
 #require_relative 'hash_db.json' #will use a different db file
-require_relative 'color'
+require_relative 'colors'
+require 'json'
 
 
 #colorToggle = not flags.noColor and stdout.isatty()
-class FieldParser
-  attr_accessor :current_line
+module HEITT
+  class Extractor
+    attr_accessor :current_line, :database
 
-  def initialize
-    @current_line = 0
-  end
-
-  def increment_line
-    @current_line += 1
-  end
-
-  def parse_field(hash_line, delim, index)
-    split_word = hash_line.split(delim)
-
-    if index < 0
-      puts "#{HEITT.colorize('[ERROR]', :red, :bold)} Invalid truncation index: #{HEITT.colorize('Negative indices not supported', :green)}"
-      exit(0)
+    def initialize(filepath = "hash_database.json")
+      @database = load_database(filepath)
+      @current_line = 0
+      @extracted_hashes = []
     end
 
-    if index < split_word.length
-      return [split_word[index], nil]
-    else
-      err_descript = "Not enough fields for truncating {#{index+1}} with delimiter '#{delim}"
-      error = {
-        status: "error",
-        message: err_descript,
-        field: split_word.length,
-        line: @current_line,
-        content: hash_line
-      }
-      return ["", error]
+    def scan_file(filepath, delimiter: nil, index: nil)
+      unless File.exist?(filepath)
+        puts HEITT.colorize("[ERROR] File #{filepath} does not exist", :bold, :red)
+        return []
+      end
+
+      content = File.read(filepath)
+
+      if delimiter && index
+        result = parse_field(content, delimiter, index)
+      else
+        result = regex_extract(content)
+      end
+      @extracted_hashes.concat(result)
+      result.uniq
+    end
+
+
+    def scan_text(text, delimiter: nil, index: nil)
+      if delimiter && index
+        result = parse_field(text, delimiter, index)
+      else
+        result = regex_extract(text)
+      end
+      @extracted_hashes.concat(result)
+      result.uniq
+    end
+
+    def <<(input)
+      if File.exist?(input) 
+        scan_file(input)
+      else
+        scan_text(input)
+      end
+      self
+    end
+
+    def finalize
+      @extracted_hashes.uniq
+    end
+
+
+    
+    private
+    def load_database(filepath)
+      unless File.exist?(filepath)
+        puts HEITT.colorize("[ERROR] Database file #{filepath} does not exist", :bold, :red)
+        exit(1)
+      end
+
+      begin
+        file_content = File.read(filepath)
+        JSON.parse(file_content, symbolize_names: true)
+      rescue JSON::ParserError => e
+        puts HEITT.colorize("[ERROR] Invalid JSON in database file: #{e.message}", :bold, :red)
+        exit(1)
+      end
+    end
+
+    def increment_line
+      @current_line += 1
+    end
+
+    def parse_field(content, delimiter, index)
+      found_hashes = []
+      content.each_line do |line|
+        increment_line
+        next if line.strip.empty?
+
+        fields = line.split(delimiter)
+
+        if index < fields.length
+          potential_hash = fields[index].strip
+        
+          found_hashes << potential_hash
+        else
+          found_hashes << regex_extract(line)
+        end
+      end
+      found_hashes 
+    end
+
+
+
+    def regex_extract(content)
+      found_hashes = []
+      @database.each do |pattern_str, _|
+        pattern = Regexp.new(pattern_str.to_s)
+        matches = content.scan(pattern)
+        found_hashes.concat(matches)
+      end
+      found_hashes.uniq
     end
   end
 end
 
-def parse_ignore(ignorable_char)
-  if ignorable_char.include?(',')
-    return ignorable_char.split(',')
-  end
-  [ignorable_char]
-end
 
-def ignore?(hash_line, ignorable_char)
-  parse_ignore(ignorable_char).each do |ignore|
-    return true if hash_line.start_with?(ignore)
-  end
-  false
-end
+#usage code
+#extractor = HEITT::Extractor.new
+#custom database
+#extractor = HEITT::Extractor.new("custom_database.json")
 
-def parse_truncate(trunc_input)
-  val_split = trunc_input.split
-  index = val_split[0].strip.gsub(/[{}]/, '').to_i
-  delim = val_split[1].strip.gsub(/`/, '')
-  [index-1, delim]
-end
+#accept both hashes and files 
+#extractor << "31eb" << "deff" << "hashes.txt"
+#puts extractor.finalize
+
+#regex scan 
+#extractor.scan_file("auth-log")
+#puts extractor.scan_text("User login with hash: 31ebdfce8b77ac49d7f5506dd1495830")
+#puts extractor.scan_text("User login with hash: 31eb")
+
+#field parsing mode
+#puts extractor.scan_file("hashes.txt", delimiter: ":", index: 5)
+#puts extractor.scan_text("root:$6$abc123.....:18000:0:99999", delimiter: ":", index: 5)
 
 
-def extract_hashed(input)
-  found_hashes = []
-  HASH_DATABASE.each do |pattern_str|
-    pattern = Regexp.new(pattern_str)
-    matches = input.scan(pattern)
-    found_hashes.concat(matches)
-  end
-  found_hashes
-end
+
+ 
+
+
+
+    

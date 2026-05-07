@@ -10,7 +10,7 @@ module HEITT
   class Extractor
     attr_accessor :current_line, :database
 
-    def initialize(filepath = "hash_database.json")
+    def initialize(filepath = "extract_database.json")
       @database = load_database(filepath)
       @current_line = 0
       @extracted_hashes = []
@@ -92,7 +92,7 @@ module HEITT
         
           found_hashes << potential_hash
         else
-          found_hashes << regex_extract(line)
+          found_hashes.concat(regex_extract(line))
         end
       end
       found_hashes 
@@ -102,8 +102,9 @@ module HEITT
 
     def regex_extract(content)
       found_hashes = []
-      @database.each do |pattern_str, _|
-        pattern = Regexp.new(pattern_str.to_s)
+      #@database.each do |pattern_str, _|
+      @database.each do |entry|
+        pattern = Regexp.new(entry[:extract_regex])
         matches = content.scan(pattern)
         found_hashes.concat(matches)
       end
@@ -114,7 +115,7 @@ end
 
 
 #usage code
-#extractor = HEITT::Extractor.new
+extractor = HEITT::Extractor.new
 #custom database
 #extractor = HEITT::Extractor.new("custom_database.json")
 
@@ -128,7 +129,7 @@ end
 #puts extractor.scan_text("User login with hash: 31eb")
 
 #field parsing mode
-#puts extractor.scan_file("hashes.txt", delimiter: ":", index: 5)
+puts extractor.scan_file("hashes.txt", delimiter: ":", index: 2)
 #puts extractor.scan_text("root:$6$abc123.....:18000:0:99999", delimiter: ":", index: 5)
 
 

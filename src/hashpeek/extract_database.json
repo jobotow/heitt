@@ -1,0 +1,606 @@
+[
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{4}\\b",  
+        "modes": [
+            {
+                "name": "CRC-16", 
+                "context": ["checksum", "networking"], 
+                "common_sources": ["file verification", "network protocols", "embedded systems"]
+            },
+            {
+                "name": "CRC-16-CCITT", 
+                "context": ["checksum", "telecom"], 
+                "common_sources": ["V.41", "X.25", "HDLC", "Bluetooth"]
+            },
+            {
+                "name": "FCS-16", 
+                "context": ["checksum", "networking"], 
+                "common_sources": ["Ethernet frames", "PPP"]
+            }
+        ]
+    },
+    { 
+        "extract_regex": "(?i)\\b[a-f0-9]{6}\\b", 
+        "modes": [
+            {
+                "name": "CRC-24", 
+                "context": ["checksum"], 
+                "common_sources": ["OpenPGP", "RFID", "some file formats"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{8}\\b", 
+        "modes": [
+            {
+                "name": "Adler-32", 
+                "common_sources": ["zlib", "PNG files", "RSYNC"], 
+                "context": ["checksum", "compression"]
+            },
+            {
+                "name": "CRC-32",  
+                "common_sources": ["ZIP files", "Ethernet", "SATA", "PNG"], 
+                "context": ["checksum", "filesystems"]
+            },
+            {
+                "name": "CRC-32B", 
+                "common_sources": ["Ethernet", "MPEG-2", "PKZIP"], 
+                "context": ["checksum", "networking"]
+            },
+            {
+                "name": "FNV-1-32", 
+                "common_sources": ["DNS", "database indexing", "hash tables"], 
+                "context": ["checksum", "programming"]
+            },
+            {
+                "name": "FNV-1a-32", 
+                "common_sources": ["programming languages", "database systems"], 
+                "context": ["checksum", "programming"]
+            },
+            {
+                "name": "Murmur3-32", 
+                "common_sources": ["Redis", "libstdc++", "various frameworks"], 
+                "context": ["programming", "caching"]
+            },
+            {
+                "name": "FCS-32", 
+                "common_sources": ["advanced networking protocols"], 
+                "context": ["checksum", "networking"]
+            },
+            {
+                "name": "GHash-32-3", 
+                "common_sources": ["research", "academic"], 
+                "context": ["experimental"]
+            },
+            {
+                "name": "GHash-32-5", 
+                "common_sources": ["research", "academic"], 
+                "context": ["experimental"]
+            },
+            {
+                "name": "Fletcher-32", 
+                "common_sources": ["OSTA UDF", "ISO/IEC 8473-1"], 
+                "context": ["checksum", "storage"]
+            },
+            {
+                "name": "Joaat", 
+                "common_sources": ["Perl", "Apache", "various applications"], 
+                "context": ["programming", "hashing"]
+            },
+            {
+                "name": "ELF-32", 
+                "common_sources": ["ELF binaries", "Unix/Linux systems"], 
+                "context": ["executable", "system"],
+                "mime_types": ["application/octet-stream"]
+            },
+            {
+                "name": "XOR-32", 
+                "common_sources": ["simple applications", "embedded systems"], 
+                "context": ["basic", "embedded"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b[a-zA-Z0-9./]{13}\\b",
+        "modes": [
+            {
+                "name": "DES (Unix)", 
+                "common_sources": ["/etc/passwd", "old Unix systems"], 
+                "context": ["unix", "legacy"]
+            },
+            {
+                "name": "DEScrypt", 
+                "common_sources": ["old Unix/Linux"], 
+                "context": ["unix", "legacy"]
+            },
+            {
+                "name": "BigCrypt", 
+                "common_sources": ["some Unix variants"], 
+                "context": ["unix", "extended"]
+            }
+        ]
+    },
+    {       
+        "extract_regex": "\\b[a-f0-9]{40}:[a-f0-9]{16}\\b",
+        "modes": [
+            {
+                "name": "Android PIN", 
+                "common_sources": ["Android lockscreen", "gesture.key files"], 
+                "context": ["mobile", "android"]
+            }
+        ]
+    },
+    {       
+        "extract_regex": "(?i)\\b[a-f0-9]{16}\\b",
+        "modes": [
+            {
+                "name": "DES(Oracle)",  
+                "common_sources": ["Oracle databases", "Oracle applications"], 
+                "context": ["database", "oracle"]
+            },
+            {
+                "name": "LM", 
+                "common_sources": ["Windows SAM", "legacy Windows"], 
+                "context": ["windows", "legacy"]
+            },
+            {
+                "name": "MySQL323", 
+                "common_sources": ["old MySQL databases", "legacy systems"], 
+                "context": ["database", "mysql"]
+            },
+            {
+                "name": "CRC-64", 
+                "common_sources": ["ISO standards", "some storage systems"], 
+                "context": ["checksum"]
+            },
+            {
+                "name": "FNV-1-64", 
+                "common_sources": ["64-bit systems", "large datasets"], 
+                "context": ["programming", "hashing"]
+            },
+            {
+                "name": "FNV-1a-64", 
+                "common_sources": ["modern applications", "databases"], 
+                "context": ["programming", "hashing"]
+            },
+            {
+                "name": "Half-MD5", 
+                "common_sources": ["some legacy systems", "custom implementations"], 
+                "context": ["legacy", "custom"]
+            }
+        ]
+    },
+    {      
+        "extract_regex": "(?i)\\b[a-z0-9./]{16}\\b",
+        "modes": [
+            {
+                "name": "Cisco-PIX(MD5)", 
+                "common_sources": ["Cisco PIX firewalls", "Cisco ASA"], 
+                "context": ["networking", "cisco"]
+            }
+        ]
+    },
+    {      
+        "extract_regex": "\\b[a-zA-Z0-9./]{24}\\b", 
+        "modes": [
+            {
+                "name": "Crypt16", 
+                "common_sources": ["some Unix variants", "Tru64"], 
+                "context": ["unix", "extended"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{24}\\b", 
+        "modes": [
+            {
+                "name": "CRC-96-ZIP", 
+                "common_sources": ["some archive formats", "specialized applications"], 
+                "context": ["checksum", "archives"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{32}\\b", "modes": [
+            {
+                "name": "MD5", 
+                "context": ["web", "checksum", "legacy", "password", "hash", "md5"],
+                "delimiters": [":", "$", " "],
+                "common_fields": [3, 5],
+                "file_types": ["shadow", "htpasswd", "logs"],
+                "mime_types": ["text/plain", "text/x-passwd"],
+                "common_sources": ["web applications", "file integrity checks", "checksums", "legacy systems"]
+                
+            },
+            {
+                "name": "NTLM", 
+                "context": ["windows", "SAM", "LSASS", "nt", "ntlm"],
+                "delimiters": [":", " "],
+                "common_fields": [3],
+                "file_types": ["ntds", "logs"],
+                "mime_types": ["text/plain", "application/octet-stream"],
+                "common_sources": ["Windows SAM", "Active Directory", "LSASS memory"]
+                
+            },
+            {
+                "name": "LM", 
+                "common_sources": ["Windows SAM", "legacy Windows systems"], 
+                "context": ["windows", "SAM"]
+            },
+            {
+                "name": "MD4", 
+                "common_sources": ["Old Windows systems", "legacy applications"]
+            },
+            {
+                "name": "Double MD5"
+            },
+            {
+                "name": "MD2"
+            },
+            {
+                "name": "RIPEMD-128"
+            },
+            {
+                "name": "BLAKE3-128"
+            },
+            {
+                "name": "FNV-1-128"
+            },
+            {
+                "name": "Murmur3-128"
+            },
+            {
+                "name": "Haval-128"
+            },
+            {
+                "name": "SNEFRU-128"
+            },
+            {
+                "name": "Skein256-128"
+            },
+            {
+                "name": "Skein512-128"
+            },
+            {
+                "name": "Tiger-128"
+            },
+            {
+                "name": "Tiger128-3"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{34}\\b", 
+        "modes": [
+            {
+                "name": "CryptoCurrency(Adress)"
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b\\$1\\$[a-zA-Z0-9./]{0,8}\\$[a-zA-Z0-9./]{22}\\b", 
+        "modes": [
+            {
+                "name": "MD5 Crypt", 
+                "common_sources": ["/etc/shadow", "web applications", "Linux systems"]
+            }
+        ]
+    },
+    {  
+        "extract_regex": "(?i)\\b[a-f0-9]{40}\\b", 
+        "modes": [
+            {
+                "name": "SHA-1",
+                "common_sources": ["Git commits", "file verification", "legacy certificates"], 
+                "context": ["token", "API", "authentication"]
+            },
+            {
+                "name": "MySQL SHA1", 
+                "common_sources": ["MySQL user tables", "database dumps", "phpMyAdmin"]
+            },
+            {
+                "name": "RIPEMD-160", 
+                "common_sources": ["Blockchain", "PGP", "TLS"]
+            },
+            {
+                "name": "Haval-160"
+            },
+            {
+                "name": "Double-SHA-1"
+            },
+            {
+                "name": "Tiger-160"
+            },
+            {
+                "name": "Tiger-160,3"
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b[a-z0-9]{43}\\b", 
+        "modes": [
+            {
+                "name": "Cisco-IOS(SHA-256)"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{48}\\b", 
+        "modes": [
+            {
+                "name": "Haval-192"
+            },
+            {
+                "name": "Tiger-192"
+            },
+            {
+                "name": "Tiger-192-3"
+            },
+            {
+                "name": "SHA-1(Oracle)"
+            },
+            {
+                "name": "OSX v10.4"
+            },
+            {
+                "name": "OSX v10.5"
+            },
+            {
+                "name": "OSX v10.6"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{49}\\b", 
+        "modes": [
+            {
+                "name": "Citrix Netscaler"
+            }
+        ]
+    },
+    {
+        
+        "extract_regex": "(?i)\\b[a-f0-9]{51}\\b", 
+        "modes": [
+            {
+                "name": "Palshop CMS"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-z0-9]{51}\\b", 
+        "modes": [
+            {
+                "name": "CryptoCurrency(PrivateKey)"
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b\\$2[abxy]\\$[0-9]{2}\\$[./A-Za-z0-9]{53}\\b", 
+        "modes": [
+            {
+                "name": "bcrypt", 
+                "common_sources": ["/etc/shadow", "modern web applications", "databases"], 
+                "context": ["modern", "secure"]
+            },
+            {
+                "name": "Woltlab Burning Board 4.x"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{56}\\b", 
+        "modes": [
+            {
+                "name": "SHA-224"
+            },
+            {
+                "name": "SHA3-224"
+            },
+            {
+                "name": "Haval-224"
+            },
+            {
+                "name": "Skein-256(224)"
+            },
+            {
+                "name": "Skein-512(224)"
+            },
+            {
+                "name": "Whirlpool-224"
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\bsnefru\\$[a-fA-F0-9]{64}\\b", 
+        "modes": [
+            {
+                "name": "Snefru-256"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{64}\\b", 
+        "modes": [
+            {
+                "name": "SHA-256", 
+                "common_sources": ["Bitcoin", "SSL certificates", "modern applications", "file verification"]
+            },
+            {
+                "name": "SHA3-256"
+            },
+            {
+                "name": "BLAKE2s"
+            },
+            {
+                "name": "BLAKE3-256"
+            },
+            {
+                "name": "RIPEMD-256"
+            },
+            {
+                "name": "Haval-256"
+            },
+            {
+                "name": "Gost"
+            },
+            {
+                "name": "GOST R 34.11-94"
+            },
+            {
+                "name": "Gost-CryptoPro S-Box"
+            },
+            {
+                "name": "SNEFRU-256"
+            },
+            {
+                "name": "EDON-R-256"
+            },
+            {
+                "name": "Skein256-256"
+            },
+            {
+                "name": "Skein512-256"
+            },
+            {
+                "name": "Whirlpool-256"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{80}\\b", 
+        "modes": [
+            {
+                "name": "RIPEMD-320"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{96}\\b", 
+        "modes": [
+            {
+                "name": "SHA-384"
+            },
+            {
+                "name": "SHA3-384"
+            },
+            {
+                "name": "Skein512-384"
+            },
+            {
+                "name": "Skein1024-384"
+            },
+            {
+                "name": "Whirlpool-384"
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\$5\\$[a-zA-Z0-9./]{0,16}\\$[a-zA-Z0-9./]{43}",
+        "modes": [
+            {
+                "name": "SHA256 Crypt", 
+                "common_sources": ["/etc/shadow", "Linux systems"], 
+                "context": ["unix", "modern"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b\\$6\\$[a-zA-Z0-9./]{0,16}\\$[a-zA-Z0-9./]{86}\\b",
+        "modes": [
+            {
+                "name": "SHA512 Crypt", 
+                "common_sources": ["/etc/shadow (modern Linux systems)", "Unix/Linux password authentication", "security focused applications"], 
+                "context": ["unix", "secure"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b\\$argon2i\\$v=[0-9]+\\$m=[0-9]+,t=[0-9]+,p=[0-9]+\\$[a-zA-Z0-9+/]+\\$[a-zA-Z0-9+/]+\\b",
+        "modes": [
+            {
+                "name": "Argon2i", 
+                "common_sources": ["modern applications", "password managers"], 
+                "context": ["modern", "secure"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b\\$pbkdf2-sha256\\$[0-9]+\\$[a-zA-Z0-9+/]+\\$[a-zA-Z0-9+/]+\\b",
+        "modes": [
+            {
+                "name": "PBKDF2-SHA256", 
+                "common_sources": ["Django", "macOS", "various apps"], 
+                "context": ["modern", "kdf"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b\\$scrypt\\$[a-zA-Z0-9]+\\$[a-zA-Z0-9+/]+\\$[a-zA-Z0-9+/]+\\b",
+        "modes": [
+            {
+                "name": "scrypt", 
+                "common_sources": ["cryptocurrencies", "some password managers"], 
+                "context": ["modern", "secure"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{102}\\b", 
+        "modes": [
+            {
+                "name": "Skein1024-408"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{128}\\b", 
+        "modes": [
+            {
+                "name": "SHA-512"
+            },
+            {
+                "name": "SHA3-512"
+            },
+            {
+                "name": "BLAKE2b"
+            },
+            {
+                "name": "BLAKE3-512"
+            },
+            {
+                "name": "Salsa10"
+            },
+            {
+                "name": "Salsa20"
+            },
+            {
+                "name": "Skein512-512"
+            },
+            {
+                "name": "Whirlpool"
+            },
+            {
+                "name": "EDON-R-512"
+            },
+            {
+                "name": "Whirlpool-1"
+            },
+            {
+                "name": "Whirlpool-2"
+            }
+        ]
+    },
+    {
+        "extract_regex": "(?i)\\b[a-f0-9]{256}\\b", 
+        "modes": [
+            {
+                "name": "Skein512-1024"
+            },
+            {
+                "name": "Skein1024-1024"
+            }
+        ]
+    }
+]
+

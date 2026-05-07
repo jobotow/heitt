@@ -6,13 +6,30 @@ require_relative 'outfmt'
 
 module HEITT
 
-  AnalysisResult = Struct.new(:hash, :algorithms, :found)
-  GroupedResult = Struct.new(:identified_result, :algorithm, :count, :percent, :hashes)
-  StreamGroupResults = Struct.new(:groups, :total_hashes)
+  class StreamGroupResults
+    attr_accessor :groups, :total_hashes
+  
+    def initialize(groups, total_hashes)
+      @groups = groups
+      @total_hashes = total_hashes
+    end
+
+    def tree_format
+      HEITT.tree_group_format(self)
+    end
+
+    def json_format
+      HEITT.json_group_format(self)
+    end
+  end
+  private_constant :StreamGroupResults
 
   class AnalysisResult
-    def default_format
-      HEITT.default_format(self)
+    attr_accessor :hash, :algorithms, :found
+    def initialize(hash, algorithms, found)
+      @hash = hash
+      @algorithms = algorithms 
+      @found = found
     end
 
     def tree_format
@@ -23,17 +40,7 @@ module HEITT
       HEITT.json_format(self)
     end
   end
-
-
-  class StreamGroupResults
-    def tree_format
-      HEITT.tree_group_format(self)
-    end
-
-    def json_format
-      HEITT.json_group_format(self)
-    end
-  end
+  private_constant :AnalysisResult
 
  
   class HashAlgo
@@ -44,34 +51,36 @@ module HEITT
       @description = attributes[:description] || ""
       @hashcat = attributes[:hashcat] || "--"
       @john = attributes[:john] || "--"
+      #release only when verbose mode
       @characteristics = attributes[:characteristics] || ""
-      @common_sources = attributes[:common_sources] || []
-      @context = attributes[:context] || []
+      #@common_sources = attributes[:common_sources] || []
+      #@context = attributes[:context] || []
       @notes = attributes[:notes] || []
-      @limitations = attributes[:limitations] || []
+      #@limitations = attributes[:limitations] || []
       @extended = attributes[:extended] || false
     end
   end
-  #private_constant :HashAlgo
+  private_constant :HashAlgo
+
 
   class HashDatabase
     attr_accessor :database, :compiled_patterns
-    def initialize(filepath = "hash_database.json")
+    def initialize(filepath)
       @database = load_database(filepath)
-      @compiled_patterns  = {}
     end
 
     
 
     def find_algorithms(hash)
-      @database.each do |pattern_str, algos|
-        pattern = Regexp.new(pattern_str.to_s)
+      matched = []
+      @database.each do |entry|
+        pattern = Regexp.new(entry[:regex])
         if hash =~ pattern
-        #if match_pattern(hash, pattern_str)
-          return [algos.map{ |algo| HashAlgo.new(algo)}, true]
+          matched.concat(entry[:modes].map { |algo| HashAlgo.new(algo)})
         end
       end
-      [[], false]
+      matched.any? ? [matched, true] : [[], false]
+      #[[], false]
     end
     
     private
@@ -94,11 +103,11 @@ module HEITT
   private_constant :HashDatabase
 
     
-  class HashAnalyzer
+  class Identifier
     attr_accessor :database, :hash_counts, :ident_results, :hash_lists, :total_hashes
 
-    def initialize(database = HashDatabase.new)
-      @database = database
+    def initialize(database = "hash_database.json")
+      @database = HashDatabase.new(database)
       @hash_counts = {}
       @ident_results = {}
       @hash_lists = {}
@@ -126,6 +135,14 @@ module HEITT
 
     def finalize
       get_stream_results
+    end
+
+
+    #Convenience funciton
+    def analyze_hash(hash, database_path = "hash_database.json")
+      database  = HashDatabase.new(database_path)
+      analyzer = HashAnalyzer.new(database)
+      analyzer.identify(hash)
     end
 
 
@@ -160,10 +177,15 @@ module HEITT
       if @total_hashes > 0 
         @hash_counts.each do |algorithm_name, count|
           
-          percent = (@count.to_f / @total_hashes.to_f) * 100
+          percent = ((count.to_f / @total_hashes.to_f) * 100).round(2)
           ident_result = @ident_results[algorithm_name]
 
-          groups << GroupedResult.new(ident_result, algorithm_name, count, percent, @hash_lists[algorithm_name])
+          groups << {
+            identified_result: ident_result, 
+            count: count, 
+            percent: percent, 
+            hashes: @hash_lists[algorithm_name]
+          }
         end
       end
       result = StreamGroupResults.new(groups, @total_hashes)
@@ -196,13 +218,6 @@ module HEITT
       line_count
     end
   end
-
-  #Convenience funciton
-  def analyze_hash(hash, database_path = "hash_database.json")
-    database  = HashDatabase.new(database_path)
-    analyzer = HashAnalyzer.new(database)
-    analyzer.identify(hash)
-  end
 end
 
 #Usage
@@ -216,19 +231,23 @@ end
 #result = analyzer.identify("b1946ac92492d2347c6235b4d2611184")
 
 #Stream processing
-ident = HEITT::HashAnalyzer.new
+ident = HEITT::Identifier.new
 #ident.stream_identify("abcd")
 #ident.stream_identify("cdef")
 
 #ident << "abcd" << "cdef"
 #result = ident.finalize
+#result = ident.identify("abdd")
+#puts "RESULTS: #{result.json_format}"
 
-#puts "TOTAL: #{result[:total_hashes]}"
-#puts "GROUP COUNT: #{result.total_hashes}"
-puts "#{ident.batch_identify(["abcd", "deff", "aabb", "aabbcc"]).tree_format}"
- #do |result|
-#  puts "Found: #{result[:algorithms]}" if result[:found]
+#ident.batch_identify(["abcd", "bcde", "aabb"]) do |single|
+ #  puts "FOund: #{single.json_format}"
 #end
+
+analyze = HEITT::Identifier.new()
+hashes = ["a95c9b6ab0e338f225f5f7595c7674b7","b1946ac92492d2347c6235b4d2611184", "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03", "e73b7fc75f15461894e98ce26c773e9e"]
+puts analyze.batch_identify(hashes).tree_format
+
 #puts "STREAM: #{ident.get_stream_results}"
 #analyzer.stream_identify("hash1")
 #analyzer.stream_identify("hash2")
@@ -237,3 +256,5 @@ puts "#{ident.batch_identify(["abcd", "deff", "aabb", "aabbcc"]).tree_format}"
 #Custom database
 #custom_db = HEITT::HashDatabase.new("custom_database")
 #custom_analyzer = HEITT::HashAnalyzer.new(custom_db)
+
+

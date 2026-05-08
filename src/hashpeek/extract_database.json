@@ -1,19 +1,23 @@
 [
     {
-        "extract_regex": "(?i)\\b[a-f0-9]{4}\\b",  
+        "extract_regex": "(?i)\\b[a-f0-9]{4}\\b",
+        "contexts": ["checksum", "networking", "telecom", "bluetooth"],
         "modes": [
             {
                 "name": "CRC-16", 
                 "context": ["checksum", "networking"], 
+                "prefixes": ["crc-16"],
+                "delimiters": [":"],
                 "common_sources": ["file verification", "network protocols", "embedded systems"]
             },
             {
                 "name": "CRC-16-CCITT", 
-                "context": ["checksum", "telecom"], 
+                "context": ["checksum", "telecom", "bluetooth"], 
                 "common_sources": ["V.41", "X.25", "HDLC", "Bluetooth"]
             },
             {
                 "name": "FCS-16", 
+                "prefixes": ["fcs-16"],
                 "context": ["checksum", "networking"], 
                 "common_sources": ["Ethernet frames", "PPP"]
             }
@@ -201,11 +205,14 @@
         ]
     },
     {
-        "extract_regex": "(?i)\\b[a-f0-9]{32}\\b", "modes": [
+        "extract_regex": "(?i)\\b[a-f0-9]{32}\\b", 
+        "contexts": ["authentication", "login", "password", "failed", "success", "user"],
+        "modes": [
             {
                 "name": "MD5", 
                 "context": ["web", "checksum", "legacy", "password", "hash", "md5"],
-                "delimiters": [":", "$", " "],
+                "delimiters": [":", "$", " ", "="],
+                "prefixes": ["md5", "hash", "checksum", "password"],
                 "common_fields": [3, 5],
                 "file_types": ["shadow", "htpasswd", "logs"],
                 "mime_types": ["text/plain", "text/x-passwd"],
@@ -215,7 +222,8 @@
             {
                 "name": "NTLM", 
                 "context": ["windows", "SAM", "LSASS", "nt", "ntlm"],
-                "delimiters": [":", " "],
+                "delimiters": [":", "="],
+                "prefixes": ["nt"],
                 "common_fields": [3],
                 "file_types": ["ntds", "logs"],
                 "mime_types": ["text/plain", "application/octet-stream"],
@@ -229,6 +237,7 @@
             },
             {
                 "name": "MD4", 
+                "context": ["hash"],
                 "common_sources": ["Old Windows systems", "legacy applications"]
             },
             {

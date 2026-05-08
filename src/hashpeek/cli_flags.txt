@@ -1,0 +1,17 @@
+-e, --extended : show extended candidates
+-D, --database FILE: use custom identification database
+-E, --extract-database FILE: use custom extraction database
+--json: Output in json format [Outputs in tree by default(when --json if false)]
+-o, --output FILE: Output file
+-d, --delimiter DELIM: Field delimiter for structured files
+-i, --index INDEX: Field index to extract
+
+#should output in json when piped or output is redirected and output tree when output is to stdout
+#To avoid always having json in files, there will be a preserved flag "-o" for it so user choose the format they want
+#Format flag will only be respected if output is to stdout or "-o" flag is used
+
+# The tool will extract hashes automatically before identifying, doesn't care if the hashes were pre-cleaned
+
+# should accept files and text input via stdin and direct input.
+# eg. heitt my_file.txt 
+#No need for a text or file flag

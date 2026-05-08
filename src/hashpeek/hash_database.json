@@ -1,5 +1,10 @@
 [
     {
+        "_credit": "Adapted from hashid prototypes.json by psypanda",
+        "_source": "https://github.com/psypanda/hashID",
+        "_license": "GPL-3.0"
+    },
+    {
         "regex": "^[a-f0-9]{4}$",
         "modes": [
             {

@@ -3,6 +3,8 @@ require 'set'
 #require_relative '../cli_flag'
 require_relative 'colors'
 require_relative 'outfmt'
+require_relative 'dbase'
+require_relative 'setup'
 
 module HEITT
 
@@ -44,7 +46,7 @@ module HEITT
 
  
   class HashAlgo
-    attr_accessor :name, :description, :hashcat, :john, :characteristics, :common_sources, :context, :notes, :limitations, :extended
+    attr_accessor :name, :description, :hashcat, :john, :characteristics, :notes, :extended
 
     def initialize(attributes = {})
       @name = attributes[:name]
@@ -53,69 +55,27 @@ module HEITT
       @john = attributes[:john] || "--"
       #release only when verbose mode
       @characteristics = attributes[:characteristics] || ""
-      #@common_sources = attributes[:common_sources] || []
-      #@context = attributes[:context] || []
       @notes = attributes[:notes] || []
-      #@limitations = attributes[:limitations] || []
       @extended = attributes[:extended] || false
     end
+
   end
   private_constant :HashAlgo
-
-
-  class HashDatabase
-    attr_accessor :database, :compiled_patterns
-    def initialize(filepath)
-      @database = load_database(filepath)
-    end
-
-    
-
-    def find_algorithms(hash)
-      matched = []
-      @database.each do |entry|
-        pattern = Regexp.new(entry[:regex])
-        if hash =~ pattern
-          matched.concat(entry[:modes].map { |algo| HashAlgo.new(algo)})
-        end
-      end
-      matched.any? ? [matched, true] : [[], false]
-      #[[], false]
-    end
-    
-    private
-    def load_database(filepath)
-      unless File.exist?(filepath)
-        puts HEITT.colorize("[ERROR] Database file #{filepath} does not exist", :bold, :red)
-        exit(1)
-      end
-
-      begin
-        file_content = File.read(filepath)
-        JSON.parse(file_content, symbolize_names: true)
-      rescue JSON::ParserError => e
-        puts HEITT.colorize("[ERROR] Invalid JSON in database file: #{e.message}", :bold, :red)
-        exit(1)
-      end
-    end
-  end
-
-  private_constant :HashDatabase
 
     
   class Identifier
     attr_accessor :database, :hash_counts, :ident_results, :hash_lists, :total_hashes
 
-    def initialize(database = "hash_database.json")
-      @database = HashDatabase.new(database)
+    def initialize(custom_database=nil)
+      @database = HEITT::Database.new.load("hash_database", custom_database)
       @hash_counts = {}
       @ident_results = {}
       @hash_lists = {}
       @total_hashes = 0
     end
 
-    def identify(hash)
-      algorithms, found = @database.find_algorithms(hash.strip)
+    def identify(hash, extended: false)
+      algorithms, found = find_algorithms(hash.strip, extended: extended)
       AnalysisResult.new(hash.strip, algorithms, found)
     end
 
@@ -124,11 +84,11 @@ module HEITT
       self
     end
 
-    def batch_identify(hashes, &block)
+    def batch_identify(hashes, extended: false, &block)
       hashes.each do |hash|
-        result = identify(hash)
+        result = identify(hash.strip, extended: extended)
         block.call(result) if block
-        stream_identify(hash)
+        stream_identify(hash.strip)
       end
       finalize
     end
@@ -151,6 +111,31 @@ module HEITT
 
     
     private 
+    #made flexible for custom databases
+    def get_regex(entry)
+      entry[:regex] || entry[:pattern] || entry[:regexp]
+    end
+
+    def get_modes(entry)
+      entry[:modes] || entry[:algorithms] || entry[:hashes] || 
+      entry[:candidates] || entry[:types] || entry[:hashtypes]
+    end
+
+    def find_algorithms(input, extended: false)
+      matched = []
+      @database.each do |entry|
+        regex = get_regex(entry)
+        modes = get_modes(entry)
+        next unless regex and modes #skip metadata entries
+        #next unless modes
+        pattern = Regexp.new(regex)
+        if hash =~ pattern
+          matched.concat(modes.select {|algo| extended || !algo[:extended]}.map { |algo| HashAlgo.new(algo)})
+        end
+      end
+      matched.any? ? [matched, true] : [[], false]
+    end
+
     def stream_identify(hash)
       return if hash.empty?
 
@@ -158,6 +143,7 @@ module HEITT
       ident_result = identify(hash)
 
       if ident_result.algorithms.any?
+        #group by first matching algorithm
         algorithm_name = ident_result.algorithms.first.name
         if @hash_counts.key?(algorithm_name)
           @hash_counts[algorithm_name] += 1
@@ -245,8 +231,9 @@ ident = HEITT::Identifier.new
 #end
 
 analyze = HEITT::Identifier.new()
-hashes = ["a95c9b6ab0e338f225f5f7595c7674b7","b1946ac92492d2347c6235b4d2611184", "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03", "e73b7fc75f15461894e98ce26c773e9e"]
-puts analyze.batch_identify(hashes).tree_format
+#hashes = ["a95c9b6ab0e338f225f5f7595c7674b7","b1946ac92492d2347c6235b4d2611184", "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03", "e73b7fc75f15461894e98ce26c773e9e"]
+#puts analyze.batch_identify(hashes).json_format
+puts analyze.identify("b1946ac92492d2347c6235b4d2611184").json_format
 
 #puts "STREAM: #{ident.get_stream_results}"
 #analyzer.stream_identify("hash1")

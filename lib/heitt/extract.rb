@@ -1,33 +1,12 @@
 require 'set'
 require 'strscan'
-#require_relative '../cli_flag'
-#require_relative 'hash_db.json' #will use a different db file
 require_relative 'colors'
 require_relative 'setup'
-require_relative 'dbase'
 require_relative 'scoring'
+require_relative 'analyze'  # FOR Testing
 require 'json'
 
-
-#colorToggle = not flags.noColor and stdout.isatty()
 module HEITT
-  #class ExtractionResult
-   # attr_accessor :results, :total_hashes
-    #attr_accessor :hash, :possible_types, :confidence
-
-    #def initialize(results)
-      #@results = results
-     # @total_hashes = results.size
-      #@hash = data[:hash]
-      #@possible_types = data[:possible_types]
-      #@confidence = data[:confidence]
-    #end
-
-    #def json_format
-     # JSON.pretty_generate(results)
-    #end
-  #end
-
   class Extractor
     attr_accessor :database
 
@@ -55,19 +34,8 @@ module HEITT
       end
 
       content = File.read(filepath)
-
-      #if delimiter && index
-      #  result = parse_field(content, delimiter, index)
-      #else
-      #  result = regex_extract(content)#@database.query(content)
-      #end
-      #result = 
       scan_text(content, delimiter: delimiter, index: index)
-      #@extracted_hashes.concat(result)
-      #ExtractionResult.new(result.uniq)
-      #result#.uniq
     end
-
 
 
 
@@ -81,17 +49,13 @@ module HEITT
     end
 
     def finalize
-      #ExtractionResult(
-        @extracted_hashes.uniq#)
+        @extracted_hashes.uniq
     end
 
 
     
     private
-    #def increment_line
-     # @current_line += 1
-    #end
-
+    
     def get_regex(entry)
       entry[:extract_regex] || entry[:regex] || entry[:pattern] || entry[:regexp]
     end
@@ -107,55 +71,39 @@ module HEITT
       #first extract documnt level context
       scorer = HEITT::Scorer.new(@database)
       context_scores = scorer.analyze(content_lower)
-
-      #puts "CONTEXT SCORES: #{context_scores}\n\n\n"
-      #keyword_counts = HEITT::ContextScorer.extract_keywords(content_lower, @database) #Extraction class
-
-      #Prescore algorithms based on document context
-      #algorithm_scores = HEITT::ContextScorer.score_algorithms(keyword_counts) #Scoring class
       
       @database.each do |entry|
         regex = get_regex(entry)
         modes = get_modes(entry)
-        #puts "ALL_MODE: #{modes}"
-        next unless regex && modes && !modes.empty? #entry_has_extractable_data?(entry)
+        next unless regex && modes && !modes.empty? 
 
         pattern = Regexp.new(regex)
         scanner = StringScanner.new(content)
         entry_contexts = entry[:contexts] || []
-        #modes = get_modes(entry)
+
 
         while scanner.scan_until(pattern)
           matched = scanner.matched
           offset = scanner.pos - matched.length
 
-          #Get prefix before hash on same line (prefix detection)
+          #Get hash prefix (prefix detection)
           delim_prefix = scorer.get_prefix(content, offset)
-          #puts "DELMITED PREFIX: #{delim_prefix}"
 
-          #score and identify the hash based on modes
-          # classify_hash should call get_line_prefix()
-          classified = scorer.classify_hash(modes, delim_prefix, context_scores) #Sorting algorithm
+          classified = scorer.collect_scored_matches(modes, delim_prefix, context_scores)
+          #puts "HASH: #{matched}    |    CLASSIFIED: #{classified}"
 
           found_hashes << {
             hash: matched,
-            #offset: offset,
-            #prefix: classified[:prefix],
             possible_types: classified
-            #name: classified[:name],
-            #confidence: classified[:confidence],
-            #label: classified[:label],
-            #score: classified[:score].class
           }
         end
       end
-      found_hashes.uniq { |h| h[:hash]}
+      found_hashes
     end
 
     def parse_field(content, delimiter, index)
       found_hashes = []
       content.each_line do |line|
-        #increment_line #uncomment when extration data are needed
         next if line.strip.empty?
 
         fields = line.split(delimiter)
@@ -168,7 +116,7 @@ module HEITT
           found_hashes.concat(@database.query(line))
         end
       end
-      found_hashes 
+      found_hashes
     end
   end
 end
@@ -188,8 +136,19 @@ extractor = HEITT::Extractor.new
 #puts extractor.scan_text("User login with hash: 31ebdfce8b77ac49d7f5506dd1495830")
 #puts extractor.scan_text("User login with hash: 31eb")
 
+ident = HEITT::Identifier.new
 #field parsing mode
-puts extractor.scan_file("hashes.txt")
+extracted = extractor.scan_file("hashes.txt")
+#puts "EXTRACTED: #{extracted}"
+extracted.each do |ext|
+  #ext[:possible_types].each do |pos|
+ #   puts "NAME: #{pos[:name]}"
+  #end
+  ident << ext
+end
+#ident << extracted
+result = ident.finalize
+puts "RESULTS: #{result.tree_format}"
 #puts extractor.scan_text("root:$6$abc123.....:18000:0:99999", delimiter: ":", index: 5)
 
 

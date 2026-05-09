@@ -108,7 +108,7 @@
         "extract_regex": "\\b[a-zA-Z0-9./]{13}\\b",
         "modes": [
             {
-                "name": "DES (Unix)", 
+                "name": "DES(Unix)", 
                 "common_sources": ["/etc/passwd", "old Unix systems"], 
                 "context": ["unix", "legacy"]
             },
@@ -117,6 +117,16 @@
                 "common_sources": ["old Unix/Linux"], 
                 "context": ["unix", "legacy"]
             },
+            {
+                "name": "BigCrypt", 
+                "common_sources": ["some Unix variants"], 
+                "context": ["unix", "extended"]
+            }
+        ]
+    },
+    {
+        "extract_regex": "\\b[a-zA-Z0-9./]{13,}\\b",
+        "modes": [
             {
                 "name": "BigCrypt", 
                 "common_sources": ["some Unix variants"], 
@@ -184,6 +194,15 @@
             }
         ]
     },
+    {
+        "extract_regex": "\\b[a-f0-9]{4,}\\b",
+        "modes": [
+            {
+                "name": "Cisco Type 7",
+                "common_sources": ["cisco"]
+            }
+        ]
+    },
     {      
         "extract_regex": "\\b[a-zA-Z0-9./]{24}\\b", 
         "modes": [
@@ -236,7 +255,9 @@
                 "context": ["windows", "SAM"]
             },
             {
-                "name": "MD4", 
+                "name": "MD4",
+                "prefixes": ["hash"],
+                "delimiters": ["=", ":"],
                 "context": ["hash"],
                 "common_sources": ["Old Windows systems", "legacy applications"]
             },
@@ -300,6 +321,7 @@
         "modes": [
             {
                 "name": "SHA-1",
+                "prefixes": ["hash"],
                 "common_sources": ["Git commits", "file verification", "legacy certificates"], 
                 "context": ["token", "API", "authentication"]
             },

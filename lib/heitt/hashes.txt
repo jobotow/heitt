@@ -1,0 +1,11 @@
+Alice:aabbcc:guest, md5= fbe0aa536fc349cbdc451ff5970f9357 hash= e452794a88a7a7067ee9846d1231cc99 Bob:aabb:user
+bluetooth bluetooth Alice:aabbcc:guest Alice:aacc
+# User login attempts
+fcs-16:aaff
+#Entropy should filter it out md5=deadbeefdeadbeefdeadbeefdeadbeef [INFO] 2025-08-25T10:00:01Z New user 'alice' created. Temp pass: welcome123
+[DEBUG] 2025-08-25T10:01:12Z Session token: nt:5f4dcc3b5aa765d61d8327deb882cf99###
+[ERROR] 2025-08-25T10:02:15Z Password reset failed for 'svc_user'. hash:d6e0d2c1a5e89c5c7b6b9bccb8b8b8b8b8b8b8b8
+Random note: nothing to see here 12345
+[WARN] 2025-08-25T10:03:33Z User 'bob' failed login. Token: ####e99a18c428cb38d5f260853678922e03###
+Some debug info: 0x4f2a1b alright this is descript G8n0KRCTGO8SY [INFO] Miscellaneous logs ####c3fcd3d76192e4007dfb496cca67e13b###
+# End of log#

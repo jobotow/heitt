@@ -1,0 +1,3 @@
+#Remember to add "-v, --verbose" mode to show other candidates with low or no confidence. (only respects for tree format)
+When no verbose mode, notes, characteristics, and description won't show
+#All input should undergo extraction for confidence scoring before identification

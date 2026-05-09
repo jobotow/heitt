@@ -8,7 +8,7 @@ module HEITT
     attr_accessor :heitt_dir, :current_hashdb_path, :current_extdb_path, :new_hashdb_path, :new_extdb_path
 
     def initialize()
-      @heitt_dir = File.join(Dir.home, "./heitt")
+      @heitt_dir = File.join(Dir.home, ".heitt")
       @current_hashdb_path = "hash_database.json"
       @current_extdb_path = "extract_database.json"  
       @new_hashdb_path = File.join(@heitt_dir, "hash_database.json")

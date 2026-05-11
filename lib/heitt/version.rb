@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
-module Heitt
-  VERSION = "0.3.0"
+module HEITT
+  VERSION = "0.4.3"
+  GITHUB = "https://github.com/jobotow/heitt"
 end

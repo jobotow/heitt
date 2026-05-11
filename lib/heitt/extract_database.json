@@ -1,61 +1,8 @@
 [
     {
-        "extract_regex": "(?i)\\b[a-f0-9]{4}\\b",
-        "contexts": ["checksum", "networking", "telecom", "bluetooth"],
-        "modes": [
-            {
-                "name": "CRC-16", 
-                "context": ["checksum", "networking"], 
-                "prefixes": ["crc-16"],
-                "delimiters": [":"],
-                "common_sources": ["file verification", "network protocols", "embedded systems"]
-            },
-            {
-                "name": "CRC-16-CCITT", 
-                "context": ["checksum", "telecom", "bluetooth"], 
-                "common_sources": ["V.41", "X.25", "HDLC", "Bluetooth"]
-            },
-            {
-                "name": "FCS-16", 
-                "prefixes": ["fcs-16"],
-                "context": ["checksum", "networking"], 
-                "common_sources": ["Ethernet frames", "PPP"]
-            }
-        ]
-    },
-    { 
-        "extract_regex": "(?i)\\b[a-f0-9]{6}\\b", 
-        "modes": [
-            {
-                "name": "CRC-24", 
-                "context": ["checksum"], 
-                "common_sources": ["OpenPGP", "RFID", "some file formats"]
-            }
-        ]
-    },
-    {
         "extract_regex": "(?i)\\b[a-f0-9]{8}\\b", 
+        "delimiters": [":", "$", " ", "="],
         "modes": [
-            {
-                "name": "Adler-32", 
-                "common_sources": ["zlib", "PNG files", "RSYNC"], 
-                "context": ["checksum", "compression"]
-            },
-            {
-                "name": "CRC-32",  
-                "common_sources": ["ZIP files", "Ethernet", "SATA", "PNG"], 
-                "context": ["checksum", "filesystems"]
-            },
-            {
-                "name": "CRC-32B", 
-                "common_sources": ["Ethernet", "MPEG-2", "PKZIP"], 
-                "context": ["checksum", "networking"]
-            },
-            {
-                "name": "FNV-1-32", 
-                "common_sources": ["DNS", "database indexing", "hash tables"], 
-                "context": ["checksum", "programming"]
-            },
             {
                 "name": "FNV-1a-32", 
                 "common_sources": ["programming languages", "database systems"], 
@@ -66,72 +13,12 @@
                 "common_sources": ["Redis", "libstdc++", "various frameworks"], 
                 "context": ["programming", "caching"]
             },
-            {
-                "name": "FCS-32", 
-                "common_sources": ["advanced networking protocols"], 
-                "context": ["checksum", "networking"]
-            },
-            {
-                "name": "GHash-32-3", 
-                "common_sources": ["research", "academic"], 
-                "context": ["experimental"]
-            },
-            {
-                "name": "GHash-32-5", 
-                "common_sources": ["research", "academic"], 
-                "context": ["experimental"]
-            },
-            {
-                "name": "Fletcher-32", 
-                "common_sources": ["OSTA UDF", "ISO/IEC 8473-1"], 
-                "context": ["checksum", "storage"]
-            },
-            {
-                "name": "Joaat", 
-                "common_sources": ["Perl", "Apache", "various applications"], 
-                "context": ["programming", "hashing"]
-            },
-            {
-                "name": "ELF-32", 
-                "common_sources": ["ELF binaries", "Unix/Linux systems"], 
-                "context": ["executable", "system"],
-                "mime_types": ["application/octet-stream"]
-            },
-            {
-                "name": "XOR-32", 
-                "common_sources": ["simple applications", "embedded systems"], 
-                "context": ["basic", "embedded"]
-            }
         ]
     },
     {
         "extract_regex": "\\b[a-zA-Z0-9./]{13}\\b",
         "modes": [
-            {
-                "name": "DES(Unix)", 
-                "common_sources": ["/etc/passwd", "old Unix systems"], 
-                "context": ["unix", "legacy"]
-            },
-            {
-                "name": "DEScrypt", 
-                "common_sources": ["old Unix/Linux"], 
-                "context": ["unix", "legacy"]
-            },
-            {
-                "name": "BigCrypt", 
-                "common_sources": ["some Unix variants"], 
-                "context": ["unix", "extended"]
-            }
-        ]
-    },
-    {
-        "extract_regex": "\\b[a-zA-Z0-9./]{13,}\\b",
-        "modes": [
-            {
-                "name": "BigCrypt", 
-                "common_sources": ["some Unix variants"], 
-                "context": ["unix", "extended"]
-            }
+            
         ]
     },
     {       
@@ -139,8 +26,7 @@
         "modes": [
             {
                 "name": "Android PIN", 
-                "common_sources": ["Android lockscreen", "gesture.key files"], 
-                "context": ["mobile", "android"]
+                
             }
         ]
     },
@@ -227,40 +113,7 @@
         "extract_regex": "(?i)\\b[a-f0-9]{32}\\b", 
         "contexts": ["authentication", "login", "password", "failed", "success", "user"],
         "modes": [
-            {
-                "name": "MD5", 
-                "context": ["web", "checksum", "legacy", "password", "hash", "md5"],
-                "delimiters": [":", "$", " ", "="],
-                "prefixes": ["md5", "hash", "checksum", "password"],
-                "common_fields": [3, 5],
-                "file_types": ["shadow", "htpasswd", "logs"],
-                "mime_types": ["text/plain", "text/x-passwd"],
-                "common_sources": ["web applications", "file integrity checks", "checksums", "legacy systems"]
-                
-            },
-            {
-                "name": "NTLM", 
-                "context": ["windows", "SAM", "LSASS", "nt", "ntlm"],
-                "delimiters": [":", "="],
-                "prefixes": ["nt"],
-                "common_fields": [3],
-                "file_types": ["ntds", "logs"],
-                "mime_types": ["text/plain", "application/octet-stream"],
-                "common_sources": ["Windows SAM", "Active Directory", "LSASS memory"]
-                
-            },
-            {
-                "name": "LM", 
-                "common_sources": ["Windows SAM", "legacy Windows systems"], 
-                "context": ["windows", "SAM"]
-            },
-            {
-                "name": "MD4",
-                "prefixes": ["hash"],
-                "delimiters": ["=", ":"],
-                "context": ["hash"],
-                "common_sources": ["Old Windows systems", "legacy applications"]
-            },
+            
             {
                 "name": "Double MD5"
             },

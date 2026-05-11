@@ -1,0 +1,158 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'io/console'
+require 'heitt'
+
+
+
+module HEITT
+  class CLI
+    attr_accessor :inputs, :extended, :verbose, :output, :json, :database, :show_regex_match, :min_entropy
+
+    def initialize
+      @inputs = []
+      @extended = false
+      @verbose = false
+      @output = ""
+      @json = false
+      @database = ""
+      @show_regex_match = false
+      @min_entropy = 3.5
+    end
+
+
+    def parse!
+      OptionParser.new do |opts|   
+        opts.banner = ""
+        opts.program_name = "heitt"
+        opts.separator "#{header("=========================================================================")}"
+        opts.separator "#{header("HEITT  v#{HEITT::VERSION} - Hash Extraction, Identification & Triage Tool")}"
+        opts.separator "#{header("=========================================================================")}"
+        opts.separator ""
+        opts.separator "Extract and identify hashes from any input."
+        opts.separator "Input may be hash string, a file or read from stin"
+        opts.separator ""
+        opts.separator "Usage: heitt [<INPUT(S)>] [OPTIONS]"
+        opts.separator ""
+        opts.separator "ARGUMENTS:"
+        opts.separator "    [<INPUT(S)>]                     Hash string or filepath"
+        opts.separator ""
+        opts.separator "GENERAL OPTIONS:"
+        opts.on("-h", "--help", "Show this help message and exit"){puts opts; exit}
+        opts.on("-v", "--version", "Show version information"){puts "heitt v#{HEITT::VERSION} by jobotow (#{HEITT::GITHUB})"; exit}
+        opts.separator ""
+
+        opts.separator ""
+        opts.separator "OUTPUT OPTIONS:"
+        opts.on("-V", "--verbose", "Show description and notes for each candidate") {@verbose = true}
+        opts.on("-j", "--json","Output in json format") {@json = true}
+        opts.on("-o", "--output FILEPATH", String, "File to write output to") {|v| @output = v}
+
+        opts.separator ""
+        opts.separator "FILTERING OPTIONS:"
+        opts.on("-e", "--extended", "Show extended candidates") {@extended = true}
+        opts.on("-r", "--regex-match", "Show regex-matched candidates") {@show_regex_match = true}
+        opts.on("-E", "--min-entropy FLOAT", Float, "Minimum entropy threshold[default: 3.5]") {|v| puts "MIN ENTROPY: #{v}"; @min_entropy = v}
+
+        opts.separator ""
+        opts.separator "DATABASE OPTIONS:"
+        opts.on("-D", "--database FILEPATH", String, "Use custom database") {|v| @database = v}
+
+        opts.separator ""
+        opts.separator "EXAMPLES:"
+        opts.separator "    heitt 634d398e96eb1550956b8128cfeb0747 -r"
+        opts.separator "    heitt auth.log"
+        opts.separator "    heitt auth.log --json --output result.json"
+        opts.separator "    heitt auth.log --extended --regex-match"
+        opts.separator "    heitt auth.log --min-entropy 4.0"
+        opts.separator "    cat auth.log | heitt "
+        opts.separator ""
+        opts.separator ""
+        opts.separator "NOTES:"
+        opts.separator "    JSON format is default when output is redirected or piped."
+        opts.separator "    Regex-match candidates are hidden by default, use '-r' to show."
+        opts.separator "    Running without input starts interactive mode."
+        opts.separator "#{header("=========================================================================")}"
+        opts.separator "#{header("END OF HELP")}"
+        opts.separator "#{header("=========================================================================")}"
+      end.parse!
+
+      @inputs = if ARGV.empty?
+        if $stdin.tty?
+          # Interactive mode
+          puts "#{header("=== HEITT INTERACTIVE MODE ====\n")}"
+          puts "Enter a hash or file"
+          loop do
+            print "heitt> "
+            input = $stdin.gets&.strip
+            break if input.nil? || input.empty?
+            results = HEITT::Scanner.scan(input, min_entropy: @min_entropy)
+            groups = HEITT::Grouper.group(results)
+            format = @json ? :json : :tree
+            output = case format
+            when :json
+              HEITT::Formatter.json(groups, extended: @extended, show_regex_match: @show_regex_match)
+            else
+              HEITT::Formatter.tree(groups, extended: @extended, show_regex_match: @show_regex_match)
+            end
+            puts output
+            puts ""
+          end
+        else
+          [$stdin.read]
+        end
+
+        
+      else
+        ARGV.dup
+      end
+      self
+    end
+
+    def run 
+      database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)
+      
+      format = @json || !$stdout.tty? ? :json : :tree
+      output = @inputs.map do |input|
+        results = HEITT::Scanner.scan(input, database: database, min_entropy: @min_entropy)
+        groups = HEITT::Grouper.group(results)
+
+        case format
+        when :json
+          HEITT::Formatter.json(groups, extended: @extended, show_regex_match: @show_regex_match)
+        else
+          HEITT::Formatter.tree(groups, extended: @extended, show_regex_match: @show_regex_match)
+        end
+      end.join("\n")
+
+      unless @output.empty?
+        File.write(@output, output)
+      else
+        puts output
+      end
+    end
+    
+    private
+    def header(text)
+      terminal_width = IO.console.winsize[1] rescue 70
+      text.center(terminal_width)
+    end
+
+
+    def load_custom_database(filepath)
+      unless File.exist?(filepath)
+        puts HEITT::Color.colorize("[ERROR] Database file #{filepath} does not exists", :bold, :red)
+        exit(1)
+      end
+      begin
+        custom_database = JSON.parse(File.read(filepath), symbolize_names: true)
+        HEITT::DATABASE +  custom_database
+      rescue JSON::ParserError => e 
+        puts "#{HEITT::Color.colorize("[ERROR] Invalid JSON in database file: ", :bold, :red)}#{e.message}"
+        exit(1)
+      end
+    end
+  end
+end
+
+cli = HEITT::CLI.new.parse!.run #if __FILE__ == $0

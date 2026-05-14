@@ -9,11 +9,11 @@ Gem::Specification.new do |spec|
   spec.email = ["jbotchwayowusu@gmail.com"]
   spec.summary = "Hash Extraction, Identification and Triage Tool."
   spec.description = "Hash Extraction, Identification and Triage Tool."
-  spec.homepage = HEITT::GITHUB#"https://github.com/jobotow/heitt"
+  spec.homepage = HEITT::GITHUB
   spec.required_ruby_version = ">= 3.1.0"
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/jobotow/heitt"
-  spec.metadata["changelog_uri"] = "https://github.com/jobotow/heitt/blob/main/CHANGELOG.md"
+  spec.metadata["source_code_uri"] = HEITT::GITHUB
+  spec.metadata["changelog_uri"] = "#{HEITT::GITHUB}/blob/main/CHANGELOG.md"
   spec.files  = Dir["lib/**/*.rb"]
   spec.bindir = "bin"
   spec.executables = ["heitt"]#spec.files.grep(%r{\Abin/}) { |f| File.basename(f) }

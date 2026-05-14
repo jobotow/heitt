@@ -152,6 +152,25 @@ module HEITT
         exit(1)
       end
     end
+
+    def decode(text, decoders)
+      #Check if result is printable ascii after decoding
+      decoders.each do |decoder|
+        case decoder
+        when "b64"
+          text = text.gsub(/[A-Za-z0-9+\/]{4,}={0,2}/) do |match|
+            current = match
+            loop do
+              #until word is non printable ascii continue decoding
+              decoded = Base64.decode64(word) #rescue break
+              current = decoded.strip.match?(/\A[[:print:]]+\z/) ? decoded.strip : break
+              #puts "IS PRINTABLE?: #{decoded.match?(/\A[[:print:]]+\z/)}"
+              #puts "RESULT: #{result}"
+            end
+            current
+          end
+        when "hex"
+          text = tesxt.gsub(/)
   end
 end
 

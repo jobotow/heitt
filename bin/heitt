@@ -2,6 +2,7 @@
 require 'optparse'
 require 'io/console'
 require 'heitt'
+#require_relative '../lib/heitt'
 
 
 
@@ -47,6 +48,7 @@ module HEITT
         opts.on("-V", "--verbose", "Show description and notes for each candidate") {@verbose = true}
         opts.on("-j", "--json","Output in json format") {@json = true}
         opts.on("-o", "--output FILEPATH", String, "File to write output to") {|v| @output = v}
+        opts.on("--debug", "Output in debug mode") {HEITT::Logger.enable_debug}
 
         opts.separator ""
         opts.separator "FILTERING OPTIONS:"
@@ -70,6 +72,7 @@ module HEITT
         opts.separator ""
         opts.separator "NOTES:"
         opts.separator "    JSON format is default when output is redirected or piped."
+        opts.separator "    Custom database if merged with default database"
         opts.separator "    Regex-match candidates are hidden by default, use '-r' to show."
         opts.separator "    Running without input starts interactive mode."
         opts.separator "#{header("=========================================================================")}"
@@ -79,9 +82,21 @@ module HEITT
 
       @inputs = if ARGV.empty?
         if $stdin.tty?
+          database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
           # Interactive mode
-          puts "#{header("=== HEITT INTERACTIVE MODE ====\n")}"
-          puts "Enter a hash or file"
+          puts header("=== HEITT INTERACTIVE MODE ====")
+          print "[debug:#{HEITT::Logger.enable_debug ? "on": "off"}  ||  "
+          print "extended: #{@extended ? "on": "off"}  ||  "
+          print "verbose: #{@verbose ? "on": "off"}  ||  "
+          print "regex-match: #{@show_regex_match ? "on": "off"}  ||  "
+          print "min-entropy: #{@min_entropy}  ||  "
+          print "database: #{@database.empty? ? "default": database}  ||  "
+          print "output-format: #{@json ? "json": "tree"}]\n"
+          puts ""
+          puts "Enter a hash or filepath. Press Ctrl+C or Enter to exit"
+          #puts "Extended: true" unless 
+          # puts used flags here
+          
           loop do
             print "heitt> "
             input = $stdin.gets&.strip
@@ -110,11 +125,16 @@ module HEITT
     end
 
     def run 
-      database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)
+      HEITT::Logger.debug("Loading database...")
+      database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
+      HEITT::Logger.debug("Database (#{@database.empty? ? "default" : @database}) loaded")
       
       format = @json || !$stdout.tty? ? :json : :tree
       output = @inputs.map do |input|
+        HEITT::Logger.debug("Scanning #{input}...")
         results = HEITT::Scanner.scan(input, database: database, min_entropy: @min_entropy)
+        HEITT::Logger.debug("Scanning completed (#{input})")
+        HEITT::Logger.debug("Grouping Results ...")
         groups = HEITT::Grouper.group(results)
 
         case format
@@ -141,36 +161,36 @@ module HEITT
 
     def load_custom_database(filepath)
       unless File.exist?(filepath)
-        puts HEITT::Color.colorize("[ERROR] Database file #{filepath} does not exists", :bold, :red)
+        HEITT::Logger.error("Database file #{filepath} does not exist")
         exit(1)
       end
       begin
         custom_database = JSON.parse(File.read(filepath), symbolize_names: true)
         HEITT::DATABASE +  custom_database
       rescue JSON::ParserError => e 
-        puts "#{HEITT::Color.colorize("[ERROR] Invalid JSON in database file: ", :bold, :red)}#{e.message}"
+        HEITT::Logger.error("Invalid JSON in database file: #{e.message}")
         exit(1)
       end
     end
 
-    def decode(text, decoders)
+  #  def decode(text, decoders)
       #Check if result is printable ascii after decoding
-      decoders.each do |decoder|
-        case decoder
-        when "b64"
-          text = text.gsub(/[A-Za-z0-9+\/]{4,}={0,2}/) do |match|
-            current = match
-            loop do
-              #until word is non printable ascii continue decoding
-              decoded = Base64.decode64(word) #rescue break
-              current = decoded.strip.match?(/\A[[:print:]]+\z/) ? decoded.strip : break
+   #   decoders.each do |decoder|
+    #    case decoder
+    #    when "b64"
+    #      text = text.gsub(/[A-Za-z0-9+\/]{4,}={0,2}/) do |match|
+    #        current = match
+    #        loop do
+    #          #until word is non printable ascii continue decoding
+     #         decoded = Base64.decode64(word) #rescue break
+     #         current = decoded.strip.match?(/\A[[:print:]]+\z/) ? decoded.strip : break
               #puts "IS PRINTABLE?: #{decoded.match?(/\A[[:print:]]+\z/)}"
               #puts "RESULT: #{result}"
-            end
-            current
-          end
-        when "hex"
-          text = tesxt.gsub(/)
+     #       end
+      #      current
+       #   end
+       # when "hex"
+        #  text = tesxt.gsub(/)
   end
 end
 

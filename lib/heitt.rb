@@ -1,11 +1,44 @@
 require 'json'
 require 'set'
 require 'strscan'
+require 'logger'
 require 'colorize'
 require_relative 'heitt/database'
 require_relative 'heitt/version'
 
 module HEITT
+  module Logger
+    @debug = false
+    #LEVELS = { debug: 0, verbose: 1, info: 2, warn: 3, error: 4 }
+    #@level = :warn 
+
+    #def self.set_level(lvl)
+    #  @level = lvl
+    #end
+    def self.enable_debug
+      @debug = true
+    end
+
+    def self.debug(msg)
+      log("[DEBUG] #{msg}", :cyan)
+    end
+
+    def self.warn(msg)
+      log("[WARN] #{msg}", :yellow)
+    end
+
+    def self.error(msg)
+      log("[ERROR] #{msg}", :red)
+    end
+
+    private
+    def self.log(msg, color)
+      return unless @debug
+      $stderr.puts HEITT::Color.colorize(msg, color)
+    end
+  end
+
+
   module Color
     def self.colorize(text, color, *styles)
       return text unless STDOUT.isatty #&& !(defined?(Flags) && Flags.no_color)
@@ -35,6 +68,7 @@ module HEITT
           count: hashes.size
         }
       end
+      HEITT::Logger.debug("Hashes grouped successfully") unless groups.empty? || groups.nil?
       groups
     end
   end
@@ -43,7 +77,9 @@ module HEITT
 
   module Analyzer
     def self.analyze(text, database: HEITT::DATABASE)
+      HEITT::Logger.debug("Counting keywords...")
       keyword_counts = keyword_counts(text.downcase, database: database)
+      HEITT::Logger.debug("Counted keywords: #{keyword_counts}")
       algorithm_scores(keyword_counts, database: database)
     end
 
@@ -84,7 +120,9 @@ module HEITT
       scores_hash = matches.map {|m| [m[:name], m[:score]]}.to_h 
       
       confidences = assign_confidence(scores_hash, prefix_matched_mode)
-      matches.map{|m| m.merge(confidence: confidences[m[:name]])}.sort_by {|m| -m[:score]}
+      scored_candidates = matches.map{|m| m.merge(confidence: confidences[m[:name]])}.sort_by {|m| -m[:score]}
+      HEITT::Logger.debug("Scored Algorithm: #{scored_candidates.map{|s| s[:name] }}  =>   Calculated Confidence: #{scored_candidates.map{|s| s[:confidence] }}")
+      scored_candidates
     end
 
 
@@ -191,7 +229,7 @@ module HEITT
     def self.scan(input, database: HEITT::DATABASE, min_entropy: 3.5)
       text = File.exist?(input) ? File.read(input) : input
       context_scores = HEITT::Analyzer.analyze(text, database: database)
-      found = {}#[]
+      found = {}
       seen = {}
      
 
@@ -203,10 +241,12 @@ module HEITT
         scanner = StringScanner.new(text)      
         
         while scanner.scan_until(pattern)
-          matched = scanner.matched
+          matched = scanner.matched 
           next unless matched.length < 8 || HEITT::Analyzer.high_entropy?(matched, min_entropy)
           offset = scanner.pos - matched.length
+          HEITT::Logger.debug("Extracting prefix..")
           delim_prefix = HEITT::Analyzer.extract_prefix(text, offset)
+          HEITT::Logger.debug("Extracted prefix: #{delim_prefix.length <= 1 ? "NULL" : delim_prefix}")
 
           candidates = HEITT::Analyzer.score_candidates(modes, delim_prefix, context_scores)
           score = candidates.first[:score]

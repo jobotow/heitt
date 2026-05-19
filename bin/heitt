@@ -85,7 +85,7 @@ module HEITT
           database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
           # Interactive mode
           puts header("=== HEITT INTERACTIVE MODE ====")
-          print "[debug:#{HEITT::Logger.enable_debug ? "on": "off"}  ||  "
+          print "[debug:#{HEITT::Logger.debug_enabled? ? "on": "off"}  ||  "
           print "extended: #{@extended ? "on": "off"}  ||  "
           print "verbose: #{@verbose ? "on": "off"}  ||  "
           print "regex-match: #{@show_regex_match ? "on": "off"}  ||  "
@@ -159,16 +159,19 @@ module HEITT
     end
 
 
-    def load_custom_database(filepath)
+
+    def load_custom_database(file_path)
+      filepath = File.expand_path(file_path)
+      HEITT::Logger.debug("#{label} filepath: #{filepath}")
       unless File.exist?(filepath)
-        HEITT::Logger.error("Database file #{filepath} does not exist")
+        HEITT::Logger.error("#{label} file #{filepath} does not exist")
         exit(1)
       end
       begin
         custom_database = JSON.parse(File.read(filepath), symbolize_names: true)
         HEITT::DATABASE +  custom_database
       rescue JSON::ParserError => e 
-        HEITT::Logger.error("Invalid JSON in database file: #{e.message}")
+        HEITT::Logger.error("Invalid JSON in #{label} file: #{e.message}")
         exit(1)
       end
     end

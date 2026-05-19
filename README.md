@@ -22,6 +22,16 @@ There are many hash identifiers out there but they seem to have one limitation o
 
 Those are the issues or limitations hashpeek is here to handle.
 
+## Features
+- Context-aware extraction and identification: Assigns confidence based on surrounding text in a given file. Just provide the file and let heitt handle it from there.
+- Entropy filtering to eliminate false positives
+- Supports 276 hashtypes - Adapted from hashid
+- Hash Clustering: Groups hashes that share the same top candidate, eliminating per-hash spam
+- Cli tool as well as a library.
+- Tree output for human readability, JSON output for scripting and piping (automatic when output is redirected)
+- Hashcat modes and John the Ripper formats per candidate
+- Extraction from dirty input: HEITT can accurately identify hashes based on surrounding context. This means it thrives on raw, unprocessed input (logs, application output, packet captures, etc). The dirtier the output, the more context HEITT has to work with, and the more accurate its identification becomes. 
+
 ## NOTE: 
 This tool prioritizes context-based identification via extraction over statistical popularity or length checks. It has being re-written in ruby from the ground up
 

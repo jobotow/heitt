@@ -35,17 +35,6 @@ Those are the issues or limitations hashpeek is here to handle.
 ## NOTE: 
 This tool prioritizes context-based identification via extraction over statistical popularity or length checks. It has being re-written in ruby from the ground up
 
-
-## TODOS
-- Add external database support (only in json). - **DONE**
-- change default format to tree format - **DONE**
-- Drop hex and context Extraction for an efficient one. - **ALMOST DONE**
-- Add contexts and metadata per hash to the hash database. - **IN PROGRESS**
-- Add Entropy filtration - **IN PROGRESS**
-- Make the tool faster
-- Fix bugs **A NEVER FINISHING TASK**
-- Accept generic extraction (not necessarily a hash) through external databases. - **ON THE FENCE**
-
 ---
 
 ## Installation

@@ -33,7 +33,8 @@ Those are the issues or limitations hashpeek is here to handle.
 - Extraction from dirty input: HEITT can accurately identify hashes based on surrounding context. This means it thrives on raw, unprocessed input (logs, application output, packet captures, etc). The dirtier the output, the more context HEITT has to work with, and the more accurate its identification becomes. 
 
 ## NOTE: 
-This tool prioritizes context-based identification via extraction over statistical popularity or length checks. It has being re-written in ruby from the ground up
+This tool prioritizes context-based identification via extraction over statistical popularity or length checks. Extraction and identification are inseparable, extraction is the mechanism by which identification becomes accurate.
+. It has being re-written in ruby from the ground up
 
 ---
 

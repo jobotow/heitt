@@ -162,9 +162,9 @@ module HEITT
 
     def load_custom_database(file_path)
       filepath = File.expand_path(file_path)
-      HEITT::Logger.debug("#{label} filepath: #{filepath}")
+      HEITT::Logger.debug("filepath: #{filepath}")
       unless File.exist?(filepath)
-        HEITT::Logger.error("#{label} file #{filepath} does not exist")
+        HEITT::Logger.error("file #{filepath} does not exist")
         exit(1)
       end
       begin

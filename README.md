@@ -236,23 +236,4 @@ NOTES:
 ```
 
 # Food For Thought
-The next step after identification isn't always cracking the hash. HEITT guieded the user to make thoughtful decisions on the next step to take by providing them with notes and descriptions. These give insights about the provided candidates letting a user make an imformed decision as to whether the discovered hashcstring is worth cracking 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+The next step after identification isn't always cracking the hash. HEITT guides the user to make thoughtful decisions on the next step to take by providing them with notes and descriptions. These give insights about the provided candidates letting a user make an informed decision as to whether the discovered hash string is worth cracking.

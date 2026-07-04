@@ -3,7 +3,7 @@
 **Heitt** is a tool as well as a library that handles hash extraction, identification and grouping 
 
 ---
-**NOTE:** This project was previously named **Hashpeek**. It has being renamed to **HEITT** to better reflect what the tool actually does and to avoid confusion with unrelated projects sharing the same name.
+**NOTE:** This project was previously named **Hashpeek**. It has being renamed to **HEITT** to better reflect what the tool actually does and to avoid confusion with unrelated projects sharing the same name. It has also been fully rewritten in Ruby.
 
 
 ---

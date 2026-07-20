@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 require 'optparse'
 require 'io/console'
-require 'heitt'
-#require_relative '../lib/heitt'
+#require 'heitt'
+require_relative '../lib/heitt'
 
 
 
@@ -16,6 +16,7 @@ module HEITT
       @verbose = false
       @output = ""
       @json = false
+      tree = false
       @database = ""
       @show_regex_match = false
       @min_entropy = 3.5
@@ -46,8 +47,9 @@ module HEITT
         opts.separator ""
         opts.separator "OUTPUT OPTIONS:"
         opts.on("-V", "--verbose", "Show description and notes for each candidate") {@verbose = true}
-        opts.on("-j", "--json","Output in json format") {@json = true}
-        opts.on("-o", "--output FILEPATH", String, "File to write output to") {|v| @output = v}
+        # opts.on("-j", "--json","Output in json format") {@json = true}
+        opts.on("-t", "--tree", "Force tree format when output is redirected"){@tree = true}
+        # opts.on("-o", "--output FILEPATH", String, "File to write output to") {|v| @output = v}
         opts.on("--debug", "Output in debug mode") {HEITT::Logger.enable_debug}
 
         opts.separator ""
@@ -74,13 +76,14 @@ module HEITT
         opts.separator "    JSON format is default when output is redirected or piped."
         opts.separator "    Custom database if merged with default database"
         opts.separator "    Regex-match candidates are hidden by default, use '-r' to show."
-        opts.separator "    Running without input starts interactive mode."
+        #opts.separator "    Running without input starts interactive mode."
         opts.separator "#{header("=========================================================================")}"
         opts.separator "#{header("END OF HELP")}"
         opts.separator "#{header("=========================================================================")}"
       end.parse!
 
       @inputs = if ARGV.empty?
+=begin
         if $stdin.tty?
           database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
           # Interactive mode
@@ -108,14 +111,15 @@ module HEITT
             when :json
               HEITT::Formatter.json(groups, extended: @extended, show_regex_match: @show_regex_match)
             else
-              HEITT::Formatter.tree(groups, extended: @extended, show_regex_match: @show_regex_match)
+              HEITT::Formatter.tree(groups, verbose: @verbose, extended: @extended, show_regex_match: @show_regex_match)
             end
             puts output
             puts ""
           end
-        else
+=end
+        #else
           [$stdin.read]
-        end
+        #end
 
         
       else
@@ -141,7 +145,7 @@ module HEITT
         when :json
           HEITT::Formatter.json(groups, extended: @extended, show_regex_match: @show_regex_match)
         else
-          HEITT::Formatter.tree(groups, extended: @extended, show_regex_match: @show_regex_match)
+          HEITT::Formatter.tree(groups, verbose: @verbose, extended: @extended, show_regex_match: @show_regex_match)
         end
       end.join("\n")
 
@@ -198,3 +202,13 @@ module HEITT
 end
 
 cli = HEITT::CLI.new.parse!.run #if __FILE__ == $0
+
+## Some flags will be removed.
+# output flag will be replaced by tree flag. it existed because
+# tree couldnt show when output was redirected.
+# json flag will be removed, although it was created  so its format will be seen
+# it now looks redundant to the automatic version.
+# -r flag wont be used for everything. it was made
+# to filter out low confidence types from  high confidence ones and show when asked for.
+# in case of all being "regex-matched", -r shouldnt be necessary.
+# this will make it convenient to check single hashes without always needing -r flag

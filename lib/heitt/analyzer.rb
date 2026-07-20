@@ -39,6 +39,7 @@ module HEITT
           john: mode[:john],
           extended: mode[:extended],
           description: profile[:description],
+          notes: profile[:notes],
           score: score
         }
       end 

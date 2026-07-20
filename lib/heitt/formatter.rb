@@ -43,6 +43,10 @@ module HEITT
             {text: "John Format: #{candidate[:john] || "--"}", children: []}
           ]
 
+          if extended
+            children << {text: "Extended: #{candidate[:extended]}", children: []}
+          end
+
           if verbose
             if candidate[:description] && !candidate[:description].empty?
               children << {text: "Description: #{candidate[:description]}", children: []}
@@ -86,7 +90,9 @@ module HEITT
                 hashcat: candidate[:hashcat],
                 john: candidate[:john],
                 confidence: candidate[:confidence],
-                description: candidate[:description]
+                extended: candidate[:extended],
+                description: candidate[:description],
+                notes: candidate[:notes]
               }
             end
           }

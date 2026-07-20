@@ -16,6 +16,7 @@ module HEITT
         }
       end
       HEITT::Logger.debug("Hashes grouped successfully") unless groups.empty? || groups.nil?
+      puts groups
       groups
     end
   end 

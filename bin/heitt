@@ -212,3 +212,8 @@ cli = HEITT::CLI.new.parse!.run #if __FILE__ == $0
 # to filter out low confidence types from  high confidence ones and show when asked for.
 # in case of all being "regex-matched", -r shouldnt be necessary.
 # this will make it convenient to check single hashes without always needing -r flag
+#auto decoding hasn't being dropped, a library "codeberg.org/jobotow/lookslike" is in the making to help with encoded string identification.
+# it will decode and check it it's a binary blob. if first decode shows binary blob, then it certainly isn't a hash hex or proper b64.
+# else it should continue decoding till ut also meets binary blob before returning back to previous text before last decode"
+# from the context that a text that's encoded once cant be decoded twice because the binary blob will show that the second text undergoing decoding was the actual answer.
+# binary blob will be the eyes as it's uncertain the number of times a text has being encoded.

@@ -1,4 +1,3 @@
-require_relative 'utils'
 module HEITT 
   module Grouper
 
@@ -15,8 +14,6 @@ module HEITT
           count: hashes.size
         }
       end
-      HEITT::Logger.debug("Hashes grouped successfully") unless groups.empty? || groups.nil?
-      puts groups
       groups
     end
   end 

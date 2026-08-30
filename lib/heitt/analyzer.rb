@@ -1,12 +1,9 @@
-require_relative 'utils'
 require_relative 'profiles'
 
 module HEITT
   module Analyzer
     def self.analyze(text, profiles: HEITT::PROFILES)#database: HEITT::DATABASE)
-      HEITT::Logger.debug("Counting keywords...")
       keyword_counts = keyword_counts(text.downcase, profiles: profiles)
-      HEITT::Logger.debug("Counted keywords: #{keyword_counts}")
       algorithm_scores(keyword_counts, profiles: profiles)
     end
 
@@ -50,7 +47,6 @@ module HEITT
       
       confidences = assign_confidence(scores_hash, prefix_matched_mode)
       scored_candidates = matches.map{|m| m.merge(confidence: confidences[m[:name]])}.sort_by {|m| -m[:score]}
-      HEITT::Logger.debug("Scored Algorithm: #{scored_candidates.map{|s| s[:name] }}  =>   Calculated Confidence: #{scored_candidates.map{|s| s[:confidence] }}")
       scored_candidates
     end
 

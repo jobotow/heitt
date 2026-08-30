@@ -25,10 +25,7 @@ module HEITT
           matched = scanner.matched 
           next unless matched.length < 8 || HEITT::Analyzer.high_entropy?(matched, min_entropy)
           offset = scanner.pos - matched.length
-          HEITT::Logger.debug("Extracting prefix..")
           delim_prefix = HEITT::Analyzer.extract_prefix(text, offset)
-          HEITT::Logger.debug("Extracted prefix: #{delim_prefix.length <= 1 ? "NULL" : delim_prefix}")
-
           candidates = HEITT::Analyzer.score_candidates(modes, delim_prefix, context_scores)
           #score = candidates.first[:score]
 

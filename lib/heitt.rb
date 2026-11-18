@@ -12,7 +12,6 @@ require_relative 'heitt/grouper'
 require_relative 'heitt/formatter'
 require_relative 'heitt/version'
 
-# module HEITT
-# something like heitt = HEITT.new(database: nil, profiles: nil)
-# heitt.identify("hash_string")
-  
+# Library should be used as 
+# ident = HEITT.new(input, "*options) which identifies snd groups 
+# ident.json or ident.tree

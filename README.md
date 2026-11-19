@@ -50,6 +50,11 @@ sudo gem install heitt
 ```ruby
 require 'heitt'
 
+ident = HEITT::Identify.new("auth.log")
+puts ident.tree # for tree output
+puts identification.json
+
+   # === OR ===
 results = HEITT::Scanner.scan("auth.log")
 groups = HEITT::Grouper.group(results)
 puts HEITT::Formatter.tree(groups)

@@ -33,8 +33,7 @@ Those are the issues or limitations hashpeek is here to handle.
 - Built for messy input: finds hashes in logs, dumps, and captures, and uses the surrounding text to tell similar types apart.
 
 ## NOTE: 
-This tool prioritizes context-based identification via extraction over statistical popularity or length checks. Extraction and identification are inseparable, extraction is the mechanism by which identification becomes accurate.
-It has been re-written in ruby from the ground up.
+HEITT identifies hashes by their surrounding context, not by how common a type is. Extraction and identification work together: finding a hash along with the text around it is what lets HEITT rank its likely types. It has been rewritten in Ruby from the ground up.
 
 ---
 

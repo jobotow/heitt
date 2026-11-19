@@ -3,7 +3,7 @@
 **Heitt** is a tool as well as a library that handles hash extraction, identification and grouping 
 
 ---
-**NOTE:** This project was previously named **Hashpeek**. It has being renamed to **HEITT** to better reflect what the tool actually does and to avoid confusion with unrelated projects sharing the same name. It has also been fully rewritten in Ruby.
+**NOTE:** This project was previously named **Hashpeek**. It has been renamed to **HEITT** to better reflect what the tool actually does and to avoid confusion with unrelated projects sharing the same name. It has also been fully rewritten in Ruby.
 
 
 ---
@@ -24,7 +24,7 @@ Those are the issues or limitations hashpeek is here to handle.
 
 ## Features
 - Context-aware extraction and identification: Assigns confidence based on surrounding text in a given file. Just provide the file and let heitt handle it from there.
-- Entropy filtering to eliminate false positives
+- Entropy filtering to drop low-randomness noise
 - Supports 276 hashtypes - Adapted from hashid
 - Hash Clustering: Groups hashes that share the same top candidate, eliminating per-hash spam
 - Cli tool as well as a library.
@@ -34,7 +34,7 @@ Those are the issues or limitations hashpeek is here to handle.
 
 ## NOTE: 
 This tool prioritizes context-based identification via extraction over statistical popularity or length checks. Extraction and identification are inseparable, extraction is the mechanism by which identification becomes accurate.
-. It has being re-written in ruby from the ground up
+It has been re-written in ruby from the ground up.
 
 ---
 
@@ -67,10 +67,10 @@ puts HEITT::Formatter.json(groups)
 ### Custom Options
 ```ruby
 require 'heitt'
-# Adjust entropy threshold and add custom database
+# Adjust entropy threshold
 results = HEITT::Identify.new("auth.log", min_entropy: 4.0)
 
-# Show detailed and regex matched candidates
+# Show detailed and unscored (regex matched) candidates
 puts results.tree(detailed: true, show_unscored: true)
 
 # For json
@@ -79,11 +79,11 @@ puts results.json(detailed: true, show_unscored: true)
  ## OR
 ```ruby
 require 'heitt'
-# Adjust entropy threshold and add custom database
+# Adjust entropy threshold
 results = HEITT::Scanner.scan("auth.log", min_entropy: 4.0)
 groups = HEITT::Grouper.group(results)
 
-# Show detailed and regex matched candidates
+# Show detailed and unscored (regex matched) candidates
 puts HEITT::Formatter.tree(groups, detailed: true, show_unscored: true)
 
 # For json
@@ -115,7 +115,7 @@ Some debug info: 0x4f2a1b alright this is descript G8n0KRCTGO8SY [INFO] Miscella
 
 ```
 
-## Output (use verbose mode to show descriptions, notes and characteristics)
+## Output (use `--detailed` to show descriptions, notes and extended candidates)
 ```bash
 [CLUSTERED HASHES]
 ├── HASH CLUSTER 1
@@ -219,26 +219,25 @@ GENERAL OPTIONS:
 
 
 OUTPUT OPTIONS:
-    -j, --json                       Output in json format
-    -o, --output FILEPATH            File to write output to
+    -d, --detailed                   Show description, notes and extended for each candidate
+    -t, --tree                       Force tree format when output is redirected
 
 FILTERING OPTIONS:
-    -d, --detailed                   Show detailed results 
-    -u, --unscored                   Show unscored candidates
+    -u, --unscored                   Show regex-matched(unscored) candidates
     -E, --min-entropy FLOAT          Minimum entropy threshold[default: 3.5]
 
 EXAMPLES:
-    heitt 634d398e96eb1550956b8128cfeb0747 -r
+    heitt 634d398e96eb1550956b8128cfeb0747 -u
     heitt auth.log
-    heitt auth.log --json --output result.json
-    heitt auth.log --detailed --unscored 
+    heitt auth.log | cat
+    heitt auth.log --detailed --unscored
     heitt auth.log --min-entropy 4.0
     cat auth.log | heitt 
 
 
 NOTES:
     JSON format is default when output is redirected or piped.
-    Regex-match candidates are hidden by default, use '-r' to show.
+    Unscored candidates are hidden by default, use '-u' to show.
    =========================================================================    
                                   END OF HELP                                   
    =========================================================================    

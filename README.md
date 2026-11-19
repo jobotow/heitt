@@ -219,7 +219,6 @@ GENERAL OPTIONS:
 
 
 OUTPUT OPTIONS:
-    -V, --verbose                    Show description and notes for each candidate
     -j, --json                       Output in json format
     -o, --output FILEPATH            File to write output to
 

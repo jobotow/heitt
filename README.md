@@ -28,9 +28,9 @@ Those are the issues or limitations hashpeek is here to handle.
 - Supports 276 hashtypes - Adapted from hashid
 - Hash clustering: hashes that share the same most likely type are grouped together, eliminating per-hash spam
 - Cli tool as well as a library.
-- Two output modes: a readable tree in your terminal, and clean JSON that switches on automatically when you pipe or redirect.
+- Readable tree output for humans, automatic JSON for scripts and pipes.
 - Hashcat modes and John the Ripper formats per candidate
-- Extraction from dirty input: HEITT can accurately identify hashes based on surrounding context. This means it thrives on raw, unprocessed input (logs, application output, packet captures, etc). The dirtier the output, the more context HEITT has to work with, and the more accurate its identification becomes. 
+- Built for messy input: finds hashes in logs, dumps, and captures, and uses the surrounding text to tell similar types apart.
 
 ## NOTE: 
 This tool prioritizes context-based identification via extraction over statistical popularity or length checks. Extraction and identification are inseparable, extraction is the mechanism by which identification becomes accurate.

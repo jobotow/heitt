@@ -31,11 +31,13 @@ module HEITT
 
       renumbered_groups.each do |group|
         result += "#{HEITT::Color.colorize("\n\n[", :bold, :blue)}#{HEITT::Color.colorize("HASH CLUSTER #{group[:cluster_id]}", :white, :bold)}#{HEITT::Color.colorize("]\n", :bold, :blue)}"#, children: []}
-        candidate_nodes = (group[:candidates]).each_with_index.map do |candidate, idx|
-          next if candidate.nil?
-          next if candidate[:name].nil?
-          next if candidate[:extended] && !detailed 
-          next if candidate[:confidence] == "regex-match" && !show_unscored
+        # Filter first, then number, so hidden candidates don't leave gaps
+        visible = group[:candidates].reject do |c|
+          c.nil? || c[:name].nil? ||
+            (c[:extended] && !detailed) ||
+            (c[:confidence] == "regex-match" && !show_unscored)
+        end
+        candidate_nodes = visible.each_with_index.map do |candidate, idx|
           confidence = candidate[:confidence] ? " — CONFIDENCE: #{candidate[:confidence].upcase}" : ""
 
           children = [
@@ -57,7 +59,7 @@ module HEITT
             text: "#{HEITT::Color.colorize("[", :bold, :blue)}#{HEITT::Color.colorize("CANDIDATE #{idx + 1}: ", :bold, :cyan)}#{HEITT::Color.colorize("#{candidate[:name]}#{confidence}", :bold, :cyan)}#{HEITT::Color.colorize("]", :bold, :blue)}",
             children: children
           }
-        end.compact
+        end
         result += render_tree(candidate_nodes, "", false, false) unless candidate_nodes.nil? || candidate_nodes.empty?
       end
       result
@@ -75,7 +77,7 @@ module HEITT
       JSON.pretty_generate(
         renumbered_groups.map do |group|
           visible_candidates = group[:candidates].select do |c|
-            (!c[:extended] || extended)  && (c[:confidence] != "regex-match" || show_unscored)
+            (!c[:extended] || detailed)  && (c[:confidence] != "regex-match" || show_unscored)
           end
           {
            cluster_id: group[:cluster_id],

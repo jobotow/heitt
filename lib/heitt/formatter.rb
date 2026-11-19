@@ -75,7 +75,7 @@ module HEITT
       JSON.pretty_generate(
         renumbered_groups.map do |group|
           visible_candidates = group[:candidates].select do |c|
-            (!c[:extended] || extended)  && (c[:confidence] != "regex-match" || show_regex_match)
+            (!c[:extended] || extended)  && (c[:confidence] != "regex-match" || show_unscored)
           end
           {
            cluster_id: group[:cluster_id],

@@ -1,14 +1,28 @@
 require 'strscan'
 require 'set'
+require 'json'
 require_relative 'analyzer'
-require_relative 'database'
-require_relative 'profiles'
 
 module HEITT
   module Scanner
 
-    def self.scan(input, profiles: HEITT::PROFILES, min_entropy: 3.5)
-      database = HEITT::DATABASE
+    DATABASE_PATH = File.join(__dir__, 'database.json')
+    PROFILES_PATH = File.join(__dir__, 'profiles.json')
+
+    def self.load_database(path = DATABASE_PATH)
+      # Symbol keys: the scanner reads entry[:extract_regex], entry[:modes], etc.
+      @database ||= JSON.parse(File.read(path), symbolize_names: true).freeze
+    end
+
+    def self.load_profiles(path = PROFILES_PATH)
+      # Profile names stay strings, fields (:context, :prefixes, ...) become symbols,
+      # the same shape the old PROFILES hash had.
+      @profiles ||= JSON.parse(File.read(path), symbolize_names: true)
+                        .transform_keys(&:to_s).freeze
+    end
+
+    def self.scan(input, profiles: load_profiles, min_entropy: 3.5)
+      database = load_database
       text = File.exist?(File.expand_path(input)) ? File.read(File.expand_path(input)) : input
       context_scores = HEITT::Analyzer.analyze(text, profiles: profiles)#database: database)
       found = {}
@@ -16,8 +30,8 @@ module HEITT
      
 
       database.each do |entry|
-        regex = get_regex(entry)
-        modes = get_modes(entry)
+        regex = entry[:extract_regex]
+        modes = entry[:modes]
         next unless regex && modes && !modes.empty?
         pattern = regex.is_a?(Regexp) ? regex : Regexp.new(regex)
         scanner = StringScanner.new(text)      
@@ -47,17 +61,6 @@ module HEITT
             result[:candidates] = result[:candidates].map {|c| c.merge(confidence: confidences[c[:name]])}
       end
       found.values
-    end
-
-    private
-    
-    def self.get_regex(entry)
-      entry[:extract_regex] || entry[:regex] || entry[:pattern] || entry[:regexp]
-    end
-
-    def self.get_modes(entry)
-      entry[:modes] || entry[:algorithms] || entry[:hashes] || 
-      entry[:candidates] || entry[:types] || entry[:hashtypes]
     end
   end
 end

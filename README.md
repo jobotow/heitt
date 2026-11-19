@@ -88,7 +88,7 @@ groups = HEITT::Grouper.group(results)
 # Show extended and regex matched candidates
 puts HEITT::Formatter.tree(groups, extended: true, show_unscored: true)
 # Show verbose output
-puts HEITT::Formatter.tree(groups, verbose: true)
+puts HEITT::Formatter.tree(groups, detailed: true)
 
 # For json
 puts HEITT::Formatter.json(groups, extended: true, show_unscored: true)

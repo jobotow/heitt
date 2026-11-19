@@ -71,12 +71,12 @@ require 'heitt'
 results = HEITT::Identify.new("auth.log", min_entropy: 4.0)
 
 # Show extended and regex matched candidates
-puts results.tree(extended: true, show_regex_match: true)
+puts results.tree(extended: true, show_unscored: true)
 # Show verbose output
 puts results.tree(verbose: true)
 
 # For json
-puts results.json(extended: true, show_regex_match: true)
+puts results.json(extended: true, show_unscored: true)
 ```
  ## OR
 ```ruby
@@ -91,7 +91,7 @@ puts HEITT::Formatter.tree(groups, extended: true, show_regex_match: true)
 puts HEITT::Formatter.tree(groups, verbose: true)
 
 # For json
-puts HEITT::Formatter.json(groups, extended: true, show_regex_match: true)
+puts HEITT::Formatter.json(groups, extended: true, show_unscored: true)
 ```
 
 ---

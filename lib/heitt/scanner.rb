@@ -8,7 +8,7 @@ module HEITT
   module Scanner
 
     def self.scan(input, profiles: HEITT::PROFILES, min_entropy: 3.5)
-      database = HEITT:: DATABASE
+      database = HEITT::DATABASE
       text = File.exist?(File.expand_path(input)) ? File.read(File.expand_path(input)) : input
       context_scores = HEITT::Analyzer.analyze(text, profiles: profiles)#database: database)
       found = {}

@@ -5,14 +5,14 @@ module HEITT
   module Formatter
 
 
-    def self.tree(groups, verbose: false, extended: false, show_regex_match: false)
+    def self.tree(groups, detailed: false, show_unscored: false)
       result = ""
 
       #Filter out groups with extended candidates as true
       visible_groups = groups.select do |group|
-        has_non_extended = group[:candidates].any? {|c| !c[:extended] || extended}
-        has_non_regex = group[:candidates].any? {|c| c[:confidence] != "regex-match" || show_regex_match}
-        has_non_extended && has_non_regex
+      #  has_non_extended = group[:candidates].any? {|c| !c[:extended] || extended}
+        has_non_regex = group[:candidates].any? {|c| c[:confidence] != "regex-match" || show_unscored}
+        #has_non_extended && has_non_regex
       end
       #Renumber after filtering
       renumbered_groups= visible_groups.each_with_index.map { |group, index| group.merge(cluster_id: index + 1) }
@@ -34,8 +34,8 @@ module HEITT
         candidate_nodes = (group[:candidates]).each_with_index.map do |candidate, idx|
           next if candidate.nil?
           next if candidate[:name].nil?
-          next if candidate[:extended] && !extended
-          next if candidate[:confidence] == "regex-match" && !show_regex_match
+          next if candidate[:extended] && !detailed 
+          next if candidate[:confidence] == "regex-match" && !show_unscored
           confidence = candidate[:confidence] ? " — CONFIDENCE: #{candidate[:confidence].upcase}" : ""
 
           children = [
@@ -43,11 +43,8 @@ module HEITT
             {text: "John Format: #{candidate[:john] || "--"}", children: []}
           ]
 
-          if extended
+          if detailed
             children << {text: "Extended: #{candidate[:extended]}", children: []}
-          end
-
-          if verbose
             if candidate[:description] && !candidate[:description].empty?
               children << {text: "Description: #{candidate[:description]}", children: []}
             end
@@ -66,11 +63,11 @@ module HEITT
       result
     end
 
-    def self.json(groups, extended: false, show_regex_match: false)
+    def self.json(groups, detailed: false, show_unscored: false)
       visible_groups = groups.select do |group|
-        has_non_extended = group[:candidates].any? {|c| c[:extended] || extended}
-        has_non_regex =  group[:candidates].any? {|c| c[:confidence] != "regex-match" || show_regex_match}
-        has_non_extended && has_non_regex
+       # has_non_extended = group[:candidates].any? {|c| c[:extended] || extended}
+        has_non_regex =  group[:candidates].any? {|c| c[:confidence] != "regex-match" || show_unscored}
+       # has_non_extended && has_non_regex
       end
       #Renumber after filtering
       renumbered_groups = visible_groups.each_with_index.map { |group, index| group.merge(cluster_id: index+1)}

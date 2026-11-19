@@ -7,6 +7,7 @@ require 'heitt'
 
 
 module HEITT
+# support for ectenral database or rules will br dropped or instead merged with default database 
   class CLI
     attr_accessor :inputs, :extended, :verbose, :tree, :database, :show_regex_match, :min_entropy, :peel_limit
     def initialize
@@ -97,42 +98,43 @@ module HEITT
       self
     end
 
-    def interactive_loop
-      database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
+    #def interactive_loop
+      # interactive aspect of this tool will be removed before next version is published 
+     # database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
       # Interactive mode
-      puts header("=== HEITT INTERACTIVE MODE ====")
+      #puts header("=== HEITT INTERACTIVE MODE ====")
       #print "[debug:#{HEITT::Logger.debug_enabled? ? "on": "off"}  ||  "
-      print "extended: #{@extended ? "on": "off"}  ||  "
-      print "peel-limit: #{@peel_limit}  ||  "
-      print "verbose: #{@verbose ? "on": "off"}  ||  "
-      print "regex-match: #{@show_regex_match ? "on": "off"}  ||  "
-      print "min-entropy: #{@min_entropy}  ||  "
-      print "database: #{@database.empty? ? "default": database}  ||  "
-      print "output-format: #{@json ? "json": "tree"}]\n"
-      puts ""
-      puts "Enter a hash or filepath. Press Ctrl+C or Enter to exit"
-      #puts "Extended: true" unless 
+    #  print "extended: #{@extended ? "on": "off"}  ||  "
+    #  print "peel-limit: #{@peel_limit}  ||  "
+    #  print "verbose: #{@verbose ? "on": "off"}  ||  "
+   #   print "regex-match: #{@show_regex_match ? "on": "off"}  ||  "
+ #     print "min-entropy: #{@min_entropy}  ||  "
+    #  print "database: #{@database.empty? ? "default": database}  ||  "
+      #print "output-format: #{@json ? "json": "tree"}]\n"
+  #    puts ""
+    #  puts "Enter a hash or filepath. Press Ctrl+C or Enter to exit"
+   #   #puts "Extended: true" unless 
       # puts used flags here
           
-      loop do
-        print "heitt> "
-        input = $stdin.gets&.strip
-        break if input.nil? || input.empty?
-        results = HEITT::Scanner.scan(input, min_entropy: @min_entropy)
-        groups = HEITT::Grouper.group(results)
+      #loop do
+     #   print "heitt> "
+    #    input = $stdin.gets&.strip
+        #break if input.nil? || input.empty?
+     #   results = HEITT::Scanner.scan(input, min_entropy: @min_entropy)
+      #  groups = HEITT::Grouper.group(results)
 
-        format = :tree
+        #format = :tree
 
-        output = case format
-        when :tree
-          HEITT::Formatter.json(groups, extended: @extended, show_regex_match: @show_regex_match)
-        else
-          HEITT::Formatter.tree(groups, verbose: @verbose, extended: @extended, show_regex_match: @show_regex_match)
-        end
-        puts output
-        puts ""
-      end
-    end
+     #   output = case format
+   #     when :tree
+   #       HEITT::Formatter.json(groups, extended: @extended, show_regex_match: @show_regex_match)
+    #    else
+  #        HEITT::Formatter.tree(groups, verbose: @verbose, extended: @extended, show_regex_match: @show_regex_match)
+  #      end
+     #   puts output
+    #    puts ""
+  #    end
+  #  end
 
 
     def run 
@@ -147,6 +149,7 @@ module HEITT
       end
 
       output = @inputs.map do |input|
+# support for decoding will be removed 
         text = read_input(input)
         text = HEITT::Decoder.peel(text, peel_limit: @peel_limit)[:final] if @peel_limit > 0
         results = HEITT::Scanner.scan(text, database: database, min_entropy: @min_entropy)

@@ -21,7 +21,7 @@ module HEITT
 
 
     def parse!
-      OptionParser.new do |opts|   
+      parser = OptionParser.new do |opts|   
         opts.banner = ""
         opts.program_name = "heitt"
         opts.separator "#{header("=========================================================================")}"
@@ -80,8 +80,8 @@ module HEITT
 
         if $stdin.tty?
           # should print help instead of hanging 
-          
-          interactive_loop
+          puts parser
+          exit
         else
           [$stdin.read]
         end

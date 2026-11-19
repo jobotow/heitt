@@ -1,8 +1,6 @@
-require_relative 'profiles'
-
 module HEITT
   module Analyzer
-    def self.analyze(text, profiles: HEITT::PROFILES)#database: HEITT::DATABASE)
+    def self.analyze(text, profiles:)
       keyword_counts = keyword_counts(text.downcase, profiles: profiles)
       algorithm_scores(keyword_counts, profiles: profiles)
     end
@@ -17,17 +15,18 @@ module HEITT
     end
       
 
-    def self.score_candidates(modes, delim_prefix, context_scores, profiles: HEITT::PROFILES)
-      prefix_matched_mode = nil
+    def self.score_candidates(modes, delim_prefix, context_scores, profiles:)
+      prefix_matched_modes = []
       #context based scoring
       matches = modes.map do |mode|
         profile = profiles[mode[:name]] || {}
         score = context_scores[mode[:name]] || 0
         #score = score_data || 0
 
-        if prefix_match?(profile, delim_prefix)
+        prefix_matched = prefix_match?(profile, delim_prefix)
+        if prefix_matched
           #boost score as confidence is high if prefix matched
-          prefix_matched_mode = mode[:name]
+          prefix_matched_modes << mode[:name]
           score += 20
         end
         {
@@ -37,7 +36,8 @@ module HEITT
           extended: mode[:extended],
           description: profile[:description],
           notes: profile[:notes],
-          score: score
+          score: score,
+          prefix_match: prefix_matched
         }
       end 
       return [] if matches.empty?
@@ -45,17 +45,13 @@ module HEITT
       #calculate confidence
       scores_hash = matches.map {|m| [m[:name], m[:score]]}.to_h 
       
-      confidences = assign_confidence(scores_hash, prefix_matched_mode)
+      confidences = assign_confidence(scores_hash, prefix_matched_modes)
       scored_candidates = matches.map{|m| m.merge(confidence: confidences[m[:name]])}.sort_by {|m| -m[:score]}
       scored_candidates
     end
 
 
     private
-    #def self.get_modes(entry)
-    #  entry[:modes] || entry[:algorithms] || entry[:hashes] || 
-    #  entry[:candidates] || entry[:types] || entry[:hashtypes]
-    #end
 
     #this  code is an inspiration of "https://github.com/chrisjchandler/entropy/blob/main/entropy.go"
     def self.entropy(text)
@@ -74,13 +70,8 @@ module HEITT
       -entropy
     end
     
-    def self.keyword_counts(content_lower, profiles: HEITT::PROFILES) #HEITT::DATABASE)
+    def self.keyword_counts(content_lower, profiles:)
       keywords = profiles.values.flat_map { |p| p[:context] || [] }.uniq.map(&:downcase)
-      #database.flat_map do |entry|
-        #modes = get_modes(entry)
-        #next [] unless modes
-        #modes.flat_map {|mode| HEITT::PROFILES[mode[:name]][:context] || []}
-      #end#.uniq.map(&:downcase)
 
       counts = {}
       keywords.each do |kw|
@@ -91,28 +82,21 @@ module HEITT
     end
 
 
-    def self.algorithm_scores(keyword_counts, profiles: HEITT::PROFILES)#database: HEITT::DATABASE)
+    def self.algorithm_scores(keyword_counts, profiles:)
       scores = {}
       return scores if keyword_counts.nil?
 
-      profiles.each do |name, profile| #database.each do |entry|
+      profiles.each do |name, profile|
         context = profile[:context] || []
         next if context.empty?
-        #modes = get_modes(entry)
-        #next unless modes
-        #modes.each do |mode|
-        #  contexts = mode[:context] || []
-        #  next if contexts.empty?
         total = context.sum {|kw| keyword_counts[kw.downcase] || 0}
         scores[name] = total if total > 0
-      #  end
       end
       scores
     end
 
 
     def self.prefix_match?(profile, delim_prefix)
-      #prefixes = mode[:prefixes] || []
       prefixes = profile[:prefixes] || []
       return false if prefixes.empty?
 
@@ -122,31 +106,34 @@ module HEITT
     end
 
 
-    def self.assign_confidence(scores_hash,  prefix_matched_mode=nil)
+    # prefix_matched_modes: names of the modes whose prefix matched (an Array, a single name, or nil)
+    def self.assign_confidence(scores_hash, prefix_matched_modes = [])
       all_scores = scores_hash.values
 
       return {} if all_scores.empty?
 
+      prefix_modes = Array(prefix_matched_modes)
       avg_score = all_scores.sum.to_f / all_scores.size
      
-      scores_hash.transform_values do |score|
-        if score == 0
-          "regex-match"
-        else
-          mode_name = scores_hash.key(score)
-          is_prefix_mode = (prefix_matched_mode == mode_name)
-          deviation = (score - avg_score) / avg_score
-
-          case deviation
-          when 2.0..Float::INFINITY
-            "high"
-          when 0.5..2.0
-            is_prefix_mode ? "high" : "medium-high"
+      scores_hash.map do |mode_name, score|
+        confidence =
+          if score == 0
+            "regex-match"
           else
-            is_prefix_mode ? "medium-high" : "medium-low"
+            is_prefix_mode = prefix_modes.include?(mode_name)
+            deviation = (score - avg_score) / avg_score
+
+            case deviation
+            when 2.0..Float::INFINITY
+              "high"
+            when 0.5..2.0
+              is_prefix_mode ? "high" : "medium-high"
+            else
+              is_prefix_mode ? "medium-high" : "medium-low"
+            end
           end
-        end 
-      end
+        [mode_name, confidence]
+      end.to_h
     end
   end
   #private_constant :Analyzer

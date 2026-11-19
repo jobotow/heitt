@@ -26,7 +26,7 @@ Those are the issues or limitations hashpeek is here to handle.
 - Context-aware extraction and identification: Assigns confidence based on surrounding text in a given file. Just provide the file and let heitt handle it from there.
 - Entropy filtering to drop low-randomness noise
 - Supports 276 hashtypes - Adapted from hashid
-- Hash Clustering: Groups hashes that share the same top candidate, eliminating per-hash spam
+- Hash clustering: hashes that share the same most likely type are grouped together, eliminating per-hash spam
 - Cli tool as well as a library.
 - Tree output for human readability, JSON output for scripting and piping (automatic when output is redirected)
 - Hashcat modes and John the Ripper formats per candidate

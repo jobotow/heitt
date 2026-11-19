@@ -94,7 +94,7 @@ module HEITT
 
     #def interactive_loop
       # interactive aspect of this tool will be removed before next version is published 
-     # database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
+     # database = @datab? HEITT::DATABASE : load_custom_database(@database)  
       # Interactive mode
       #puts header("=== HEITT INTERACTIVE MODE ====")
       #print "[debug:#{HEITT::Logger.debug_enabled? ? "on": "off"}  ||  "
@@ -132,8 +132,6 @@ module HEITT
 
 
     def run 
-      database = @database.empty? ? HEITT::DATABASE : load_custom_database(@database)  
-      
       format = if @tree
         :tree
       elsif !$stdout.tty?
@@ -145,8 +143,8 @@ module HEITT
       output = @inputs.map do |input|
 # support for decoding will be removed 
         text = read_input(input)
-        text = HEITT::Decoder.peel(text, peel_limit: @peel_limit)[:final] if @peel_limit > 0
-        results = HEITT::Scanner.scan(text, database: database, min_entropy: @min_entropy)
+        # text = HEITT::Decoder.peel(text, peel_limit: @peel_limit)[:final] if @peel_limit > 0
+        results = HEITT::Scanner.scan(text, min_entropy: @min_entropy)
         groups = HEITT::Grouper.group(results)
 
         case format
@@ -173,40 +171,14 @@ module HEITT
       terminal_width = IO.console.winsize[1] rescue 70
       text.center(terminal_width)
     end
-
-
-
-    def load_custom_database(file_path)
-      filepath = File.expand_path(file_path)
-      HEITT::Logger.debug("filepath: #{filepath}")
-      unless File.exist?(filepath)
-        HEITT::Logger.error("file #{filepath} does not exist")
-        exit(1)
-      end
-      begin
-        custom_database = JSON.parse(File.read(filepath), symbolize_names: true)
-        HEITT::DATABASE +  custom_database
-      rescue JSON::ParserError => e 
-        HEITT::Logger.error("Invalid JSON in #{label} file: #{e.message}")
-        exit(1)
-      end
-    end
   end
 end
 
 cli = HEITT::CLI.new.parse!.run #if __FILE__ == $0
 
+
 ## Some flags will be removed.
-# output flag will be replaced by tree flag. it existed because
-# tree couldnt show when output was redirected.
-# json flag will be removed, although it was created  so its format will be seen
-# it now looks redundant to the automatic version.
 # -r flag wont be used for everything. it was made
 # to filter out low confidence types from  high confidence ones and show when asked for.
 # in case of all being "regex-matched", -r shouldnt be necessary.
 # this will make it convenient to check single hashes without always needing -r flag
-#auto decoding hasn't being dropped, a library "codeberg.org/jobotow/lookslike" is in the making to help with encoded string identification.
-# it will decode and check it it's a binary blob. if first decode shows binary blob, then it certainly isn't a hash hex or proper b64.
-# else it should continue decoding till ut also meets binary blob before returning back to previous text before last decode"
-# from the context that a text that's encoded once cant be decoded twice because the binary blob will show that the second text undergoing decoding was the actual answer.
-# binary blob will be the eyes as it's uncertain the number of times a text has being encoded.

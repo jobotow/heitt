@@ -41,7 +41,7 @@ module HEITT
           next unless matched.length < 8 || HEITT::Analyzer.high_entropy?(matched, min_entropy)
           offset = scanner.pos - matched.length
           delim_prefix = HEITT::Analyzer.extract_prefix(text, offset)
-          candidates = HEITT::Analyzer.score_candidates(modes, delim_prefix, context_scores)
+          candidates = HEITT::Analyzer.score_candidates(modes, delim_prefix, context_scores, profiles: profiles)
           #score = candidates.first[:score]
 
           found[matched] ||= {hash: matched, candidates: []}
@@ -57,7 +57,8 @@ module HEITT
 
             # Re-assign confidence based on final merged scores
             scores_hash = result[:candidates].map {|c| [c[:name], c[:score]]}.to_h
-            confidences = Analyzer.assign_confidence(scores_hash)
+            prefix_modes = result[:candidates].select {|c| c[:prefix_match]}.map {|c| c[:name]}
+            confidences = Analyzer.assign_confidence(scores_hash, prefix_modes)
             result[:candidates] = result[:candidates].map {|c| c.merge(confidence: confidences[c[:name]])}
       end
       found.values

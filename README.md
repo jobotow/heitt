@@ -70,13 +70,11 @@ require 'heitt'
 # Adjust entropy threshold and add custom database
 results = HEITT::Identify.new("auth.log", min_entropy: 4.0)
 
-# Show extended and regex matched candidates
-puts results.tree(extended: true, show_unscored: true)
-# Show verbose output
-puts results.tree(verbose: true)
+# Show detailed and regex matched candidates
+puts results.tree(detailed: true, show_unscored: true)
 
 # For json
-puts results.json(extended: true, show_unscored: true)
+puts results.json(detailed: true, show_unscored: true)
 ```
  ## OR
 ```ruby
@@ -86,12 +84,12 @@ results = HEITT::Scanner.scan("auth.log", min_entropy: 4.0)
 groups = HEITT::Grouper.group(results)
 
 # Show extended and regex matched candidates
-puts HEITT::Formatter.tree(groups, extended: true, show_unscored: true)
+puts HEITT::Formatter.tree(groups, detailed: true, show_unscored: true)
 # Show verbose output
 puts HEITT::Formatter.tree(groups, detailed: true)
 
 # For json
-puts HEITT::Formatter.json(groups, extended: true, show_unscored: true)
+puts HEITT::Formatter.json(groups, detailed: true, show_unscored: true)
 ```
 
 ---
@@ -228,15 +226,15 @@ OUTPUT OPTIONS:
     -o, --output FILEPATH            File to write output to
 
 FILTERING OPTIONS:
-    -e, --extended                   Show extended candidates
-    -r, --regex-match                Show regex-matched candidates
+    -d, --detailed                   Show detailed results 
+    -u, --unscored                   Show unscored candidates
     -E, --min-entropy FLOAT          Minimum entropy threshold[default: 3.5]
 
 EXAMPLES:
     heitt 634d398e96eb1550956b8128cfeb0747 -r
     heitt auth.log
     heitt auth.log --json --output result.json
-    heitt auth.log --extended --regex-match
+    heitt auth.log --detailed --unscored 
     heitt auth.log --min-entropy 4.0
     cat auth.log | heitt 
 

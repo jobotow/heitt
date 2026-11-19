@@ -8,7 +8,7 @@ require 'heitt'
 
 module HEITT
   class CLI
-    attr_accessor :inputs, :extended, :verbose, :tree, :show_regex_match, :min_entropy, :peel_limit
+    attr_accessor :inputs, :detailed, :tree, :show_unscored, :min_entropy
     def initialize
       @inputs = []
      # @extended = false

@@ -68,6 +68,20 @@ puts HEITT::Formatter.json(groups)
 ```ruby
 require 'heitt'
 # Adjust entropy threshold and add custom database
+results = HEITT::Identify.new("auth.log", database: "path_to/my_custom/database.json", min_entropy: 4.0)
+
+# Show extended and regex matched candidates
+puts results.tree(extended: true, show_regex_match: true)
+# Show verbose output
+puts results.tree(verbose: true)
+
+# For json
+puts results.json(extended: true, show_regex_match: true)
+```
+ ## OR
+```ruby
+require 'heitt'
+# Adjust entropy threshold and add custom database
 results = HEITT::Scanner.scan("auth.log", database: "path_to/my_custom/database.json", min_entropy: 4.0)
 groups = HEITT::Grouper.group(results)
 

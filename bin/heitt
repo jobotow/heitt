@@ -48,12 +48,12 @@ module HEITT
 
         opts.separator ""
         opts.separator "FILTERING OPTIONS:"
-        opts.on("-u", "--unscored", "Show regex-matched(unscored) candidates") {@unscored = true}
-        opts.on("-E", "--min-entropy FLOAT", Float, "Minimum entropy threshold[default: 3.5]") {|v| puts "MIN ENTROPY: #{v}"; @min_entropy = v}
+        opts.on("-u", "--unscored", "Show regex-matched(unscored) candidates") {@show_unscored = true}
+        opts.on("-E", "--min-entropy FLOAT", Float, "Minimum entropy threshold[default: 3.5]") {|v| @min_entropy = v}
 
         opts.separator ""
         opts.separator "EXAMPLES:"
-        opts.separator "    heitt 634d398e96eb1550956b8128cfeb0747 -r"
+        opts.separator "    heitt 634d398e96eb1550956b8128cfeb0747 -u"
         opts.separator "    heitt auth.log"
         opts.separator "    heitt auth.log | cat"
         opts.separator "    heitt auth.log --detailed --unscored"
@@ -63,11 +63,13 @@ module HEITT
         opts.separator ""
         opts.separator "NOTES:"
         opts.separator "    JSON format is default when output is redirected or piped."
-        opts.separator "    Unscored candidates are hidden by default, use '-r' to show."
+        opts.separator "    Unscored candidates are hidden by default, use '-u' to show."
         opts.separator "#{header("=========================================================================")}"
         opts.separator "#{header("END OF HELP")}"
         opts.separator "#{header("=========================================================================")}"
-      end.parse!
+      end
+      # parse! returns the leftover argv, not the parser, so keep the parser in its own variable
+      parser.parse!
 
       @inputs = if ARGV.empty?
 
@@ -135,14 +137,14 @@ module HEITT
 
       output = @inputs.map do |input|
 # support for decoding will be removed 
-        text = read_input(input)
+        # Scanner.scan already reads a file path or takes the raw string
         # text = HEITT::Decoder.peel(text, peel_limit: @peel_limit)[:final] if @peel_limit > 0
-        results = HEITT::Scanner.scan(text, min_entropy: @min_entropy)
+        results = HEITT::Scanner.scan(input, min_entropy: @min_entropy)
         groups = HEITT::Grouper.group(results)
 
         case format
         when :json
-          HEITT::Formatter.json(groups, show_unscored: @show_unscored)
+          HEITT::Formatter.json(groups, detailed: @detailed, show_unscored: @show_unscored)
         else
           HEITT::Formatter.tree(groups, detailed: @detailed , show_unscored: @show_unscored)
         end
@@ -156,9 +158,6 @@ module HEITT
     end
     
     private
-    def read_input(input)
-      File.exist?(File.expand_path(input)) ? File.read(File.expand_path(input)) : input
-    end
 
     def header(text)
       terminal_width = IO.console.winsize[1] rescue 70

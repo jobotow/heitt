@@ -7,16 +7,14 @@ require 'heitt'
 
 
 module HEITT
-# support for ectenral database or rules will br dropped or instead merged with default database 
   class CLI
-    attr_accessor :inputs, :extended, :verbose, :tree, :database, :show_regex_match, :min_entropy, :peel_limit
+    attr_accessor :inputs, :extended, :verbose, :tree, :show_regex_match, :min_entropy, :peel_limit
     def initialize
       @inputs = []
       @extended = false
       @verbose = false
       @tree = false
       @peel_limit = 0
-      @database = ""
       @show_regex_match = false
       @min_entropy = 3.5
     end
@@ -60,10 +58,6 @@ module HEITT
         opts.on("-E", "--min-entropy FLOAT", Float, "Minimum entropy threshold[default: 3.5]") {|v| puts "MIN ENTROPY: #{v}"; @min_entropy = v}
 
         opts.separator ""
-        opts.separator "DATABASE OPTIONS:"
-        opts.on("-D", "--database FILEPATH", String, "Use custom database") {|v| @database = v}
-
-        opts.separator ""
         opts.separator "EXAMPLES:"
         opts.separator "    heitt 634d398e96eb1550956b8128cfeb0747 -r"
         opts.separator "    heitt auth.log"
@@ -75,7 +69,6 @@ module HEITT
         opts.separator ""
         opts.separator "NOTES:"
         opts.separator "    JSON format is default when output is redirected or piped."
-        opts.separator "    Custom database if merged with default database"
         opts.separator "    Regex-match candidates are hidden by default, use '-r' to show."
         opts.separator "    Running without input starts interactive mode."
         opts.separator "#{header("=========================================================================")}"
@@ -86,7 +79,8 @@ module HEITT
       @inputs = if ARGV.empty?
 
         if $stdin.tty?
-          # instead of hanging, make it interactive
+          # should print help instead of hanging 
+          
           interactive_loop
         else
           [$stdin.read]

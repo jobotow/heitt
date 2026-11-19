@@ -83,10 +83,8 @@ require 'heitt'
 results = HEITT::Scanner.scan("auth.log", min_entropy: 4.0)
 groups = HEITT::Grouper.group(results)
 
-# Show extended and regex matched candidates
+# Show detailed and regex matched candidates
 puts HEITT::Formatter.tree(groups, detailed: true, show_unscored: true)
-# Show verbose output
-puts HEITT::Formatter.tree(groups, detailed: true)
 
 # For json
 puts HEITT::Formatter.json(groups, detailed: true, show_unscored: true)

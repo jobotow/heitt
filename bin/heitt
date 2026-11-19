@@ -11,11 +11,11 @@ module HEITT
     attr_accessor :inputs, :extended, :verbose, :tree, :show_regex_match, :min_entropy, :peel_limit
     def initialize
       @inputs = []
-      @extended = false
-      @verbose = false
+     # @extended = false
+      @detailed = false
       @tree = false
-      @peel_limit = 0
-      @show_regex_match = false
+      #@peel_limit = 0
+      @show_unscored = false
       @min_entropy = 3.5
     end
 
@@ -43,18 +43,12 @@ module HEITT
 
         opts.separator ""
         opts.separator "OUTPUT OPTIONS:"
-        opts.on("-V", "--verbose", "Show description and notes for each candidate") {@verbose = true}
+        opts.on("-d", "--detailed", "Show description, notes and extended for each candidate") {@detailed = true}
         opts.on("-t", "--tree", "Force tree format when output is redirected"){@tree = true}
-        opts.on("--debug", "Output in debug mode") {HEITT::Logger.enable_debug}
-
-        opts.separator ""
-        opts.separator "DECODE OPTIONS:"
-        opts.on("-L", "--peel-limit INTEGER", Integer, "Maximum decode layers to peel(supports base64 and hex)") {|v| @peel_limit = v}
 
         opts.separator ""
         opts.separator "FILTERING OPTIONS:"
-        opts.on("-e", "--extended", "Show extended candidates") {@extended = true}
-        opts.on("-r", "--regex-match", "Show regex-matched candidates") {@show_regex_match = true}
+        opts.on("-u", "--unscored", "Show regex-matched(unscored) candidates") {@unscored = true}
         opts.on("-E", "--min-entropy FLOAT", Float, "Minimum entropy threshold[default: 3.5]") {|v| puts "MIN ENTROPY: #{v}"; @min_entropy = v}
 
         opts.separator ""
@@ -62,15 +56,14 @@ module HEITT
         opts.separator "    heitt 634d398e96eb1550956b8128cfeb0747 -r"
         opts.separator "    heitt auth.log"
         opts.separator "    heitt auth.log | cat"
-        opts.separator "    heitt auth.log --extended --regex-match"
+        opts.separator "    heitt auth.log --detailed --unscored"
         opts.separator "    heitt auth.log --min-entropy 4.0"
         opts.separator "    cat auth.log | heitt "
         opts.separator ""
         opts.separator ""
         opts.separator "NOTES:"
         opts.separator "    JSON format is default when output is redirected or piped."
-        opts.separator "    Regex-match candidates are hidden by default, use '-r' to show."
-        opts.separator "    Running without input starts interactive mode."
+        opts.separator "    Unscored candidates are hidden by default, use '-r' to show."
         opts.separator "#{header("=========================================================================")}"
         opts.separator "#{header("END OF HELP")}"
         opts.separator "#{header("=========================================================================")}"
@@ -149,9 +142,9 @@ module HEITT
 
         case format
         when :json
-          HEITT::Formatter.json(groups, extended: @extended, show_regex_match: @show_regex_match)
+          HEITT::Formatter.json(groups, show_unscored: @show_unscored)
         else
-          HEITT::Formatter.tree(groups, verbose: @verbose, extended: @extended, show_regex_match: @show_regex_match)
+          HEITT::Formatter.tree(groups, detailed: @detailed , show_unscored: @show_unscored)
         end
       end.join("\n")
 

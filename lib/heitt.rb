@@ -15,3 +15,10 @@ require_relative 'heitt/version'
 # Library should be used as 
 # ident = HEITT.new(input, "*options) which identifies snd groups 
 # ident.json or ident.tree
+module HEITT
+  attr_accessor: :
+results = HEITT::Scanner.scan("auth.log")
+groups = HEITT::Grouper.group(results)
+puts HEITT::Formatter.tree(groups)
+# OR for json
+puts HEITT::Formatter.json(groups)

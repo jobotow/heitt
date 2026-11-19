@@ -1,6 +1,4 @@
-require_relative 'heitt/profiles'
 require_relative 'heitt/decoder'
-require_relative 'heitt/database'
 require_relative 'heitt/analyzer'
 require_relative 'heitt/scanner'
 require_relative 'heitt/grouper'
@@ -11,21 +9,19 @@ module HEITT
   class Identify
     attr_reader :groups
 
-    def initialize(input, min_entropy: 3.5, extended: false, show_regex_match: false, verbose: false)
-      @extended         = extended
-      @show_regex_match = show_regex_match
-      @verbose          = verbose
-
+    def initialize(input, min_entropy: 3.5)
       scan_opts = { min_entropy: min_entropy }
       @groups = Grouper.group(Scanner.scan(input, **scan_opts))
     end
 
-    def tree
-      Formatter.tree(@groups, extended: @extended, show_regex_match: @show_regex_match, verbose: @verbose)
+    # Options given here override the ones passed to new, so both
+    # Identify.new(f, detailed: true).tree and Identify.new(f).tree(detailed: true) work.
+    def tree(detailed: false, show_unscored: false)
+      Formatter.tree(@groups, detailed: detailed, show_unscored: show_unscored)
     end
 
-    def json
-      Formatter.json(@groups, extended: @extended, show_regex_match: @show_regex_match)
+    def json(detailed: false, show_unscored: false)
+      Formatter.json(@groups, detailed: detailed, show_unscored: show_unscored)
     end
   end
 end

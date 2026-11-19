@@ -21,9 +21,19 @@ module HEITT
                         .transform_keys(&:to_s).freeze
     end
 
+    # A file path is read, anything else is treated as the text itself.
+    # Raw dumps can contain null bytes or start with "~", which make
+    # File.expand_path / File.file? raise, so those fall back to plain text.
+    def self.read_input(input)
+      path = File.expand_path(input)
+      File.file?(path) ? File.read(path) : input
+    rescue ArgumentError, SystemCallError
+      input
+    end
+
     def self.scan(input, profiles: load_profiles, min_entropy: 3.5)
       database = load_database
-      text = File.exist?(File.expand_path(input)) ? File.read(File.expand_path(input)) : input
+      text = read_input(input)
       context_scores = HEITT::Analyzer.analyze(text, profiles: profiles)#database: database)
       found = {}
       #seen = {}

@@ -52,7 +52,7 @@ require 'heitt'
 
 ident = HEITT::Identify.new("auth.log")
 puts ident.tree # for tree output
-puts identification.json
+puts ident.json
 
    # === OR ===
 results = HEITT::Scanner.scan("auth.log")

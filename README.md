@@ -68,7 +68,7 @@ puts HEITT::Formatter.json(groups)
 ```ruby
 require 'heitt'
 # Adjust entropy threshold and add custom database
-results = HEITT::Identify.new("auth.log", database: "path_to/my_custom/database.json", min_entropy: 4.0)
+results = HEITT::Identify.new("auth.log", min_entropy: 4.0)
 
 # Show extended and regex matched candidates
 puts results.tree(extended: true, show_regex_match: true)
@@ -82,7 +82,7 @@ puts results.json(extended: true, show_regex_match: true)
 ```ruby
 require 'heitt'
 # Adjust entropy threshold and add custom database
-results = HEITT::Scanner.scan("auth.log", database: "path_to/my_custom/database.json", min_entropy: 4.0)
+results = HEITT::Scanner.scan("auth.log", min_entropy: 4.0)
 groups = HEITT::Grouper.group(results)
 
 # Show extended and regex matched candidates
@@ -232,9 +232,6 @@ FILTERING OPTIONS:
     -r, --regex-match                Show regex-matched candidates
     -E, --min-entropy FLOAT          Minimum entropy threshold[default: 3.5]
 
-DATABASE OPTIONS:
-    -D, --database FILEPATH          Use custom database
-
 EXAMPLES:
     heitt 634d398e96eb1550956b8128cfeb0747 -r
     heitt auth.log
@@ -247,7 +244,6 @@ EXAMPLES:
 NOTES:
     JSON format is default when output is redirected or piped.
     Regex-match candidates are hidden by default, use '-r' to show.
-    Running without input starts interactive mode.
    =========================================================================    
                                   END OF HELP                                   
    =========================================================================    

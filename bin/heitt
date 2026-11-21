@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 require 'optparse'
 require 'io/console'
-require 'heitt'
-#require_relative '../lib/heitt'
+#require 'heitt'
+require_relative '../lib/heitt'
 
 
 

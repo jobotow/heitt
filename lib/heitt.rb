@@ -1,4 +1,3 @@
-require_relative 'heitt/decoder'
 require_relative 'heitt/analyzer'
 require_relative 'heitt/scanner'
 require_relative 'heitt/grouper'
